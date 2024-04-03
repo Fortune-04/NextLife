@@ -1,38 +1,32 @@
 {
   "name": "ui",
-  "version": "1.0",
-  "description": "Aim for the future",
-  "main": "main.js",
+  "private": true,
+  "version": "0.0.0",
   "scripts": {
-    "start": "react-scripts start",
-    "electron": "electron .",
-    "dev": "concurrently \"cross-env BROWSER=none npm start\" \"wait-on http://localhost:3000 && electron .\""
+    "dev": "vite",
+    "build": "tsc && vite build && electron-builder",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "Are Lee",
-  "license": "ISC",
   "dependencies": {
-    "electron": "^29.1.5",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3",
-    "react-scripts": "^5.0.1",
-    "wait-on": "^7.2.0"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "axios": "^1.6.8",
-    "concurrently": "^8.2.2"
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.1.6",
+    "electron": "^29.1.4",
+    "electron-builder": "^24.13.3",
+    "vite-plugin-electron": "^0.28.4",
+    "vite-plugin-electron-renderer": "^0.14.5"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "main": "dist-electron/main.js"
 }
