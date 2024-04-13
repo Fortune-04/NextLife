@@ -1,4 +1,6 @@
 import { useState, useEffect, ReactNode } from 'react'
+
+//Import icon
 import { CurrencyDollarIcon } from '@heroicons/react/24/solid'
 import { BanknotesIcon } from '@heroicons/react/24/solid'
 import { ArrowTrendingUpIcon } from '@heroicons/react/24/solid'
@@ -69,15 +71,6 @@ const Dashboard = () => {
       setPreNetworth(response.data[response.data.length - 1].total_networth)
       setIncome(response.data[response.data.length - 1].monthly_income)
       if (response.data.length !== 0) {
-        // for (let i = 0; i < response.data.length; i++) {
-        //   // let date = response.data[i].updated_at.split("T").pop();
-        //   let date = response.data[i].updated_at.substring(
-        //     0,
-        //     response.data[i].updated_at.length - 17
-        //   )
-        //   setXAxis((data) => [...data, date])
-        //   setYAxis((data) => [...data, response.data[i].total_networth])
-        // }
         setDatas(response.data)
       }
     } catch (error) {
@@ -90,7 +83,8 @@ const Dashboard = () => {
   }, [])
 
   const processedData = datas.map((item) => ({
-    date: new Date(item.created_at).toLocaleDateString(), // Extracting date part
+    // Extracting date
+    date: new Date(item.created_at).toLocaleDateString(),
     value: item.total_networth,
   }))
 
@@ -166,18 +160,21 @@ const Dashboard = () => {
         </BoxWrapper>
       </div>
 
-      <div className='h-[35rem] mt-3 bg-white p-4 rounded-sm border border-gray-200 flex flex-col flex-1'>
+      <div className='h-[35rem] mt-3 bg-white p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
         <ResponsiveContainer width='100%' height='100%'>
           <LineChart
             width={1000}
             height={550}
             data={processedData}
-            margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+            margin={{ top: 20, right: 5, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray='3 3' />
-            {/* <CartesianGrid strokeDasharray='3 3'>
-              <Label value='My Chart Title' position='top' />
-            </CartesianGrid> */}
-            <XAxis dataKey='date' />
+            <XAxis dataKey='date'>
+              <Label
+                value='Networth vs Time'
+                position='insideTop'
+                offset={-497}
+              />
+            </XAxis>
             <YAxis />
             <Tooltip />
             <Line type='monotone' dataKey='value' stroke='#8884d8' />
