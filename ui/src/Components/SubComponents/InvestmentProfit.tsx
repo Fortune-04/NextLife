@@ -3,12 +3,12 @@ import NetworthFinder from '../../Apis/NetworthFinder'
 
 interface Data {
   id: number
-  names: string
-  values: number
-  exvalue: number
-  invest: boolean
-  created_at: Date
-  updated_at: Date
+  name: string
+  value: number
+  base_value: number
+  investment: boolean
+  // created_at: Date
+  // updated_at: Date
 }
 
 interface CalculationProps {
@@ -23,8 +23,8 @@ const Calculation: React.FC<CalculationProps> = ({ type }) => {
 
   const calc = () => {
     for (let i = 0; i < datas.length; i++) {
-      value = value + datas[i].values
-      capital = capital + datas[i].exvalue
+      value = value + datas[i].value
+      capital = capital + datas[i].base_value
     }
     setTotalProfit(value - capital)
   }
@@ -33,10 +33,10 @@ const Calculation: React.FC<CalculationProps> = ({ type }) => {
     const fetchData = async () => {
       try {
         const response = await NetworthFinder.get('/')
-        if (response.data.length !== 0) {
+        if (response.data.data.networth.length !== 0) {
           // Filter and update datas state with only invest true data
-          const filteredData: Data[] = response.data.filter(
-            (data: Data) => data.invest
+          const filteredData: Data[] = response.data.data.networth.filter(
+            (data: Data) => data.investment
           )
           setDatas(filteredData)
         }

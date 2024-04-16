@@ -29,8 +29,9 @@ interface Data {
   id: number
   total_networth: number
   monthly_income: number
-  created_at: Date
-  updated_at: Date
+  investment_profit: number
+  monthly_profit: number
+  date: Date
 }
 
 const Dashboard = () => {
@@ -44,7 +45,7 @@ const Dashboard = () => {
     try {
       const body = { total_networth, monthly_income }
       console.log(body)
-      const response = await Networth_TimeFinder.post('/create', body)
+      const response = await Networth_TimeFinder.post('/', body)
       fetchData()
     } catch (error) {
       console.log(error)
@@ -54,11 +55,10 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       const response = await NetworthFinder.get('/')
-      console.log(response.data)
       let totalValue = 0
-      if (response.data.length !== 0) {
-        for (let i = 0; i < response.data.length; i++) {
-          totalValue = totalValue + response.data[i].values
+      if (response.data.data.networth.length !== 0) {
+        for (let i = 0; i < response.data.data.networth.length; i++) {
+          totalValue = totalValue + response.data.data.networth[i].value
         }
         setTotal(totalValue)
       }
@@ -68,10 +68,18 @@ const Dashboard = () => {
 
     try {
       const response = await Networth_TimeFinder.get('/')
-      setPreNetworth(response.data[response.data.length - 1].total_networth)
-      setIncome(response.data[response.data.length - 1].monthly_income)
-      if (response.data.length !== 0) {
-        setDatas(response.data)
+      setPreNetworth(
+        response.data.data.networth_time[
+          response.data.data.networth_time.length - 1
+        ].total_networth
+      )
+      setIncome(
+        response.data.data.networth_time[
+          response.data.data.networth_time.length - 1
+        ].monthly_income
+      )
+      if (response.data.data.networth_time.length !== 0) {
+        setDatas(response.data.data.networth_time)
       }
     } catch (error) {
       console.log(error)
@@ -84,7 +92,7 @@ const Dashboard = () => {
 
   const processedData = datas.map((item) => ({
     // Extracting date
-    date: new Date(item.created_at).toLocaleDateString(),
+    date: new Date(item.date).toLocaleDateString(),
     value: item.total_networth,
   }))
 

@@ -9,12 +9,11 @@ import { ChevronDoubleDownIcon } from '@heroicons/react/24/solid'
 
 interface Data {
   id: number
-  names: string
-  values: number
-  exvalue: number
-  invest: boolean
-  created_at: Date
-  updated_at: Date
+  name: string
+  value: number
+  base_value: number
+  investment: boolean
+  date: Date
 }
 
 const Investment = () => {
@@ -27,8 +26,8 @@ const Investment = () => {
 
   const calc = () => {
     for (let i = 0; i < datas.length; i++) {
-      value = value + datas[i].values
-      capital = capital + datas[i].exvalue
+      value = value + datas[i].value
+      capital = capital + datas[i].base_value
     }
 
     setTotalValue(value)
@@ -40,10 +39,10 @@ const Investment = () => {
     const fetchData = async () => {
       try {
         const response = await NetworthFinder.get('/')
-        if (response.data.length !== 0) {
+        if (response.data.data.networth.length !== 0) {
           // Filter and update datas state with only invest true data
-          const filteredData: Data[] = response.data.filter(
-            (data: Data) => data.invest
+          const filteredData: Data[] = response.data.data.networth.filter(
+            (data: Data) => data.investment
           )
           setDatas(filteredData)
         }
@@ -157,19 +156,19 @@ const Investment = () => {
             {datas &&
               datas.map((data) => (
                 <tr key={data.id}>
-                  <td className='px-6 py-4 whitespace-nowrap'>{data.names}</td>
+                  <td className='px-6 py-4 whitespace-nowrap'>{data.name}</td>
                   <td className='px-6 py-4 text-center align-middle whitespace-nowrap'>
-                    {data.values}
+                    {data.value}
                   </td>
                   <td className='px-6 py-4 text-center align-middle whitespace-nowrap'>
-                    {data.exvalue}
+                    {data.base_value}
                   </td>
                   <td className='px-6 py-4 text-center align-middle whitespace-nowrap'>
-                    {data.values - data.exvalue}
+                    {data.value - data.base_value}
                   </td>
                   <td className='px-6 py-4 text-center align-middle whitespace-nowrap'>
                     {(
-                      ((data.values - data.exvalue) / data.exvalue) *
+                      ((data.value - data.base_value) / data.base_value) *
                       100
                     ).toFixed(2)}
                   </td>

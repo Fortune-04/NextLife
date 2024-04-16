@@ -4,27 +4,24 @@ import NetworthFinder from '../Apis/NetworthFinder'
 import { PlusIcon } from '@heroicons/react/24/solid'
 
 interface FormData {
+  id: number
   name: string
   value: number
-  target_value: number
+  base_value: number
   investment: boolean
 }
 
 const Networth: React.FC = () => {
   const [datas, setDatas] = useState<any[]>([])
-  const [names, setName] = useState('test')
-  const [values, setValue] = useState(2300)
-  const [baseValue, setBaseValue] = useState(2000)
-  const [invest, setInvest] = useState(false)
-  const [id, setId] = useState(0)
 
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
 
   const [formData, setFormData] = useState<FormData>({
+    id: 0,
     name: '',
     value: 0,
-    target_value: 0,
+    base_value: 0,
     investment: false,
   })
 
@@ -50,21 +47,29 @@ const Networth: React.FC = () => {
     id: number,
     name: string,
     value: number,
-    exvalue: number,
-    invest: boolean
+    base_value: number,
+    investment: boolean
   ) => {
-    setId(id)
     setFormData({
       ...formData,
+      id: id,
       name: name,
       value: value,
-      target_value: exvalue,
-      investment: invest,
+      base_value: base_value,
+      investment: investment,
     })
     setIsUpdateOpen(true)
   }
 
   const closeUpdateModal = () => {
+    setFormData({
+      ...formData, // Keep existing state for other fields
+      id: 0,
+      name: '',
+      value: 0,
+      base_value: 0,
+      investment: false,
+    })
     setIsUpdateOpen(false)
   }
 
@@ -72,13 +77,13 @@ const Networth: React.FC = () => {
     e.preventDefault()
     try {
       const body = {
-        names: formData.name,
-        values: formData.value,
-        exvalue: formData.target_value,
-        invest: formData.investment,
+        name: formData.name,
+        value: formData.value,
+        base_value: formData.base_value,
+        investment: formData.investment,
       }
       console.log(body)
-      const response = await NetworthFinder.post('/create', body)
+      const response = await NetworthFinder.post('/', body)
       fetchData()
     } catch (error) {
       console.log(error)
@@ -88,7 +93,7 @@ const Networth: React.FC = () => {
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await NetworthFinder.delete(`/delete/${id}`)
+      const response = await NetworthFinder.delete(`/${id}`)
       setDatas(
         datas.filter((data) => {
           return data.id !== id
@@ -106,27 +111,28 @@ const Networth: React.FC = () => {
     e.preventDefault()
     try {
       const body = {
-        names: formData.name,
-        values: formData.value,
-        exvalue: formData.target_value,
-        invest: formData.investment,
+        id: formData.id,
+        name: formData.name,
+        value: formData.value,
+        base_value: formData.base_value,
+        investment: formData.investment,
       }
-      const response = await NetworthFinder.put(`/update/${id}`, body)
+      const response = await NetworthFinder.put(`/`, body)
       setDatas([])
       fetchData()
     } catch (error) {
       console.log(error)
     }
-    closeUpdateModal()
+    setIsUpdateOpen(false)
   }
 
   const fetchData = async () => {
     try {
       const response = await NetworthFinder.get('/')
       console.log(response.data)
-      if (response.data.length !== 0) {
+      if (response.data.data.networth.length !== 0) {
         // Update state once with all the data
-        setDatas(response.data)
+        setDatas(response.data.data.networth)
       }
     } catch (error) {
       console.log(error)
@@ -147,8 +153,8 @@ const Networth: React.FC = () => {
               key={data.id}
               className='bg-white rounded-lg overflow-hidden shadow-md border border-gray-200'>
               <div className='p-6'>
-                <h2 className='text-lg font-semibold mb-4'>{data.names}</h2>
-                <p className='text-gray-700'>{data.values}</p>
+                <h2 className='text-lg font-semibold mb-4'>{data.name}</h2>
+                <p className='text-gray-700'>{data.value}</p>
               </div>
               <div className='flex flex-col h-full bg-gray-100'>
                 {/* <div className='p-6'></div>{' '} */}
@@ -159,10 +165,10 @@ const Networth: React.FC = () => {
                     onClick={() =>
                       openUpdateModal(
                         data.id,
-                        data.names,
-                        data.values,
-                        data.exvalue,
-                        data.invest
+                        data.name,
+                        data.value,
+                        data.base_value,
+                        data.investment
                       )
                     }>
                     Edit
@@ -250,9 +256,9 @@ const Networth: React.FC = () => {
                   <label htmlFor='target_value'>Target value:</label>
                   <input
                     type='number'
-                    id='target_value'
-                    name='target_value'
-                    value={formData.target_value}
+                    id='base_value'
+                    name='base_value'
+                    value={formData.base_value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
@@ -354,9 +360,9 @@ const Networth: React.FC = () => {
                   <label htmlFor='target_value'>Target value:</label>
                   <input
                     type='number'
-                    id='target_value'
-                    name='target_value'
-                    value={formData.target_value}
+                    id='base_value'
+                    name='base_value'
+                    value={formData.base_value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
