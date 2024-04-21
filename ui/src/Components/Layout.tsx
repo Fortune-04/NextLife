@@ -14,7 +14,7 @@ const Layout = () => {
     { title: 'Goal', src: 'Calendar', gap: true, path: 'goal' },
     { title: 'Skill', src: 'Search', path: 'skill' },
     // { title: 'Files ', src: 'Folder', gap: true, path: '#' },
-    { title: 'Setting', src: 'Setting', gap: true, path: '#' },
+    { title: 'Settings', src: 'Setting', gap: true, path: '#' },
   ]
 
   return (
