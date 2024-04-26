@@ -1,8 +1,93 @@
 import React, { useState, useEffect } from 'react'
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
+import Goal_UltimateFinder from '../Apis/Goal_UltimateFinder'
+import Goal_OtherFinder from '../Apis/Goal_OtherFinder'
+import CurrentValueCalculation from '../Components/SubComponents/CurrentValueCalculation'
+
+interface FormData {
+  id: number
+  name: string
+  target_value: number
+  current_value: number
+  image_source: string
+  status: boolean
+}
 
 const Goal: React.FC = () => {
+  //Temporary data
+  const [goalUltimateDatas, setGoalUltimateDatas] = useState<any[]>([])
+  const [goalOtherDatas, setGoalOtherDatas] = useState<any[]>([])
+  //Tab
   const [activeTab, setActiveTab] = useState<string>('#tab1')
+  //Modal
+  const [isOpen, setIsOpen] = useState(false)
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false)
+  //FormData
+  const [goalOther, setGoalOther] = useState('')
+  const [formData, setFormData] = useState<FormData>({
+    id: 0,
+    name: '',
+    target_value: 0,
+    current_value: 0,
+    image_source: '',
+    status: false,
+  })
+
+  const handleChangeGoalOther = (event: ChangeEvent<HTMLInputElement>) => {
+    // Update the state with the new value entered by the user
+    setGoalOther(event.target.value)
+  }
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }))
+  }
+
+  const openModal = () => {
+    setIsOpen(true)
+  }
+
+  const closeModal = () => {
+    setIsOpen(false)
+  }
+
+  const openUpdateModal = (
+    id: number,
+    name: string,
+    target_value: number,
+    current_value: number,
+    image_source: string,
+    status: boolean
+  ) => {
+    setFormData({
+      ...formData,
+      id: id,
+      name: name,
+      target_value: target_value,
+      current_value: current_value,
+      image_source: image_source,
+      status: status,
+    })
+    setIsUpdateOpen(true)
+  }
+
+  const closeUpdateModal = () => {
+    setFormData({
+      ...formData, // Keep existing state for other fields
+      id: 0,
+      name: '',
+      target_value: 0,
+      current_value: 0,
+      image_source: '',
+      status: false,
+    })
+    setIsUpdateOpen(false)
+  }
 
   useEffect(() => {
     const tabs = document.querySelectorAll('[data-tab-target]')
@@ -35,6 +120,84 @@ const Goal: React.FC = () => {
     document.querySelector('#tab1')?.classList.remove('hidden')
   }, []) // Empty dependency array to run once on mount
 
+  const handleUpdate = async (e) => {
+    // e.preventDefault()
+    // try {
+    //   const body = {
+    //     id: formData.id,
+    //     name: formData.name,
+    //     target_value: formData.tavalue,
+    //     curent_value: formData.base_value,
+    //     investment: formData.investment,
+    //   }
+    //   const response = await NetworthFinder.put(`/`, body)
+    //   setDatas([])
+    //   fetchData()
+    // } catch (error) {
+    //   console.log(error)
+    // }
+    // setIsUpdateOpen(false)
+  }
+
+  const handleSubmitGoalOther = async (e) => {
+    e.preventDefault()
+    try {
+      const body = {
+        name: goalOther,
+        complete_status: false,
+      }
+      const response = await Goal_OtherFinder.post(`/`, body)
+      fetchData()
+    } catch (error) {
+      console.log(error)
+    }
+    setIsUpdateOpen(false)
+  }
+
+  const handleDeleteGoalOther = async (id: number) => {
+    try {
+      const response = await Goal_OtherFinder.delete(`/${id}`)
+      setGoalOtherDatas(
+        goalOtherDatas.filter((data) => {
+          return data.id !== id
+        })
+      )
+      console.log(response)
+      // setOpenDelModal(false);
+      // setOpenSnackDel(true);
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const fetchData = async () => {
+    try {
+      const response = await Goal_UltimateFinder.get('/')
+      console.log(response.data)
+      if (response.data.data.goal_ultimate.length !== 0) {
+        // Update state once with all the data
+        setGoalUltimateDatas(response.data.data.goal_ultimate)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+
+    try {
+      const response = await Goal_OtherFinder.get('/')
+      console.log(response.data)
+      if (response.data.data.goal_other.length !== 0) {
+        // Update state once with all the data
+        setGoalOtherDatas(response.data.data.goal_other)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
   return (
     <>
       {/* <div className="bg-[url('./src/assets/Cloud.jpeg')] m-auto grid place-items-center"> */}
@@ -64,120 +227,56 @@ const Goal: React.FC = () => {
               activeTab === '#tab1' ? '' : 'hidden'
             }`}>
             <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 py-4'>
-              <div className='w-300 h-60 bg-gray-300 rounded-xl'>
-                <div className='bg-white rounded-lg overflow-hidden shadow-md flex'>
-                  {/* Image Section */}
-                  <div className='w-1/2 p-2'>
-                    <img
-                      src='./src/assets/Cloud.jpeg'
-                      alt='Your Image'
-                      className='object-cover h-full w-full'
-                    />
-                  </div>
+              {goalUltimateDatas &&
+                goalUltimateDatas.map((data) => (
+                  <div className='w-300 h-60 bg-gray-300 rounded-xl'>
+                    <div className='bg-white rounded-lg overflow-hidden shadow-md flex'>
+                      {/* Image Section */}
+                      <div className='w-1/2 p-2'>
+                        <img
+                          src='./src/assets/Cloud.jpeg'
+                          alt='Your Image'
+                          className='object-cover h-full w-full'
+                        />
+                      </div>
 
-                  {/* Content Section */}
-                  <div className='p-4 flex flex-col justify-between'>
-                    <div>
-                      <h2 className='text-lg font-semibold mb-1'>
-                        Buy a house
-                      </h2>
-                      <h2 className='text-lg font-semibold mb-1'>Target</h2>
-                      <p className='text-gray-700 mb-2'>50000</p>
-                      <h2 className='text-lg font-semibold mb-1'>Current</h2>
-                      <p className='text-gray-700 mb-2'>2000</p>
-                    </div>
-                    <div className='mt-4'>
-                      <button className='bg-green-500 text-white px-4 py-2 rounded-lg'>
-                        Update
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className='w-300 h-60 bg-gray-300 rounded-xl'>
-                <div className='bg-white rounded-lg overflow-hidden shadow-md flex'>
-                  {/* Image Section */}
-                  <div className='w-1/2 p-2'>
-                    <img
-                      src='./src/assets/Cloud.jpeg'
-                      alt='Your Image'
-                      className='object-cover h-full w-full'
-                    />
-                  </div>
-
-                  {/* Content Section */}
-                  <div className='p-4 flex flex-col justify-between'>
-                    <div>
-                      <h2 className='text-lg font-semibold mb-1'>Buy a car</h2>
-                      <h2 className='text-lg font-semibold mb-1'>Target</h2>
-                      <p className='text-gray-700 mb-2'>50000</p>
-                      <h2 className='text-lg font-semibold mb-1'>Current</h2>
-                      <p className='text-gray-700 mb-2'>2000</p>
-                    </div>
-                    <div className='mt-4'>
-                      <button className='bg-green-500 text-white px-4 py-2 rounded-lg'>
-                        Update
-                      </button>
+                      {/* Content Section */}
+                      <div className='p-4 flex flex-col justify-between'>
+                        <div>
+                          <h2 className='text-lg font-semibold mb-1'>
+                            {data.name}
+                          </h2>
+                          <h2 className='text-lg font-semibold mb-1'>Target</h2>
+                          <p className='text-gray-700 mb-2'>
+                            {data.target_value}
+                          </p>
+                          <h2 className='text-lg font-semibold mb-1'>
+                            Current
+                          </h2>
+                          <p className='text-gray-700 mb-2'>
+                            <CurrentValueCalculation id={data.id} />
+                          </p>
+                        </div>
+                        <div className='mt-4'>
+                          <button
+                            className='bg-green-500 text-white px-4 py-2 rounded-lg'
+                            onClick={() =>
+                              openUpdateModal(
+                                data.id,
+                                data.name,
+                                data.target_value,
+                                data.current_value,
+                                data.image_source,
+                                data.status
+                              )
+                            }>
+                            Update
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div className='w-300 h-60 bg-gray-300 rounded-xl'>
-                <div className='bg-white rounded-lg overflow-hidden shadow-md flex'>
-                  {/* Image Section */}
-                  <div className='w-1/2 p-2'>
-                    <img
-                      src='./src/assets/Cloud.jpeg'
-                      alt='Your Image'
-                      className='object-cover h-full w-full'
-                    />
-                  </div>
-
-                  {/* Content Section */}
-                  <div className='p-4 flex flex-col justify-between'>
-                    <div>
-                      <h2 className='text-lg font-semibold mb-1'>Marriage</h2>
-                      <h2 className='text-lg font-semibold mb-1'>Target</h2>
-                      <p className='text-gray-700 mb-2'>50000</p>
-                      <h2 className='text-lg font-semibold mb-1'>Current</h2>
-                      <p className='text-gray-700 mb-2'>2000</p>
-                    </div>
-                    <div className='mt-4'>
-                      <button className='bg-green-500 text-white px-4 py-2 rounded-lg'>
-                        Update
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className='w-300 h-60 bg-gray-300 rounded-xl'>
-                <div className='bg-white rounded-lg overflow-hidden shadow-md flex'>
-                  {/* Image Section */}
-                  <div className='w-1/2 p-2'>
-                    <img
-                      src='./src/assets/Cloud.jpeg'
-                      alt='Your Image'
-                      className='object-cover h-full w-full'
-                    />
-                  </div>
-
-                  {/* Content Section */}
-                  <div className='p-4 flex flex-col justify-between'>
-                    <div>
-                      <h2 className='text-lg font-semibold mb-1'>Retirement</h2>
-                      <h2 className='text-lg font-semibold mb-1'>Target</h2>
-                      <p className='text-gray-700 mb-2'>50000</p>
-                      <h2 className='text-lg font-semibold mb-1'>Current</h2>
-                      <p className='text-gray-700 mb-2'>2000</p>
-                    </div>
-                    <div className='mt-4'>
-                      <button className='bg-green-500 text-white px-4 py-2 rounded-lg'>
-                        Update
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                ))}
             </div>
           </div>
           <div
@@ -186,38 +285,40 @@ const Goal: React.FC = () => {
               activeTab === '#tab2' ? '' : 'hidden'
             }`}>
             <div className='grid grid-cols-1 xl:grid-cols-1 gap-4 py-3  '>
-              <div className='flex items-center space-x-4 w-1400 h-12 bg-gray-300 rounded-xl'>
-                {/* Checkbox */}
-                <input
-                  type='checkbox'
-                  className='h-4 w-4 text-blue-600 border-gray-300 rounded'
-                />
+              {goalOtherDatas &&
+                goalOtherDatas.map((data) => (
+                  <div className='flex items-center justify-between space-x-4 w-1400 h-12 bg-gray-300 rounded-xl'>
+                    {/* Checkbox */}
+                    {/* <input
+                      type='checkbox'
+                      className='h-4 w-4 text-blue-600 border-gray-300 rounded'
+                    /> */}
 
-                {/* Sentence */}
-                <span className='text-gray-800'>
-                  Agree to terms and conditions
-                </span>
+                    {/* Sentence */}
+                    <span className='text-gray-800'>{data.name}</span>
 
-                {/* Icon */}
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='h-6 w-6 text-gray-600'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'>
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={2}
-                    d='M5 13l4 4L19 7'
-                  />
-                </svg>
-              </div>
-              <div className='w-1400 h-12 bg-gray-300 rounded-xl'></div>
-              <div className='w-1400 h-12 bg-gray-300 rounded-xl'></div>
-              <div className='w-1400 h-12 bg-indigo-100 rounded-xl'>
+                    {/* Icon */}
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      className='h-6 w-6 text-gray-600'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                      onClick={() => handleDeleteGoalOther(data.id)}>
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M5 13l4 4L19 7'
+                      />
+                    </svg>
+                  </div>
+                ))}
+              <div className='flex items-center justify-between w-1400 h-12 bg-indigo-100 rounded-xl'>
                 You can do it!
-                <button className='flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 focus:outline-none'>
+                <button
+                  className='flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 focus:outline-none'
+                  onClick={openModal}>
                   <PlusCircleIcon className='w-6 h-6' />
                 </button>
               </div>
@@ -232,6 +333,171 @@ const Goal: React.FC = () => {
         </div>
       </div>
       {/* </div> */}
+
+      {/* Modal for update goal_ultimate*/}
+      {isUpdateOpen && (
+        <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+          <div className='bg-white p-6 rounded-lg shadow-xl'>
+            {/* Close Button */}
+            <button
+              // onClick={closeModal}
+              className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+              <svg
+                className='h-6 w-6'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M6 18L18 6M6 6l12 12'
+                />
+              </svg>
+            </button>
+
+            {/* Form Content */}
+            <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+              <div className='bg-white p-6 rounded-lg shadow-xl w-96'>
+                <button
+                  // onClick={onClose}
+                  className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+                  <svg
+                    className='h-6 w-6'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'>
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M6 18L18 6M6 6l12 12'
+                    />
+                  </svg>
+                </button>
+
+                <form onSubmit={handleUpdate}>
+                  <label htmlFor='name'>Name:</label>
+                  <input
+                    type='text'
+                    id='name'
+                    name='name'
+                    value={formData.name}
+                    onChange={handleChange}
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'
+                  />
+
+                  <label htmlFor='target_value'>Target value:</label>
+                  <input
+                    type='number'
+                    id='base_value'
+                    name='base_value'
+                    value={formData.target_value}
+                    onChange={handleChange}
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'
+                  />
+
+                  <label htmlFor='investment'>Current</label>
+                  <select
+                    id='investment'
+                    name='investment'
+                    value={formData.current_value}
+                    onChange={handleChange}
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
+                    <option value=''>Select Type</option>
+                    <option value='true'>Yes</option>
+                    <option value='false'>No</option>
+                  </select>
+
+                  <div className='flex justify-between'>
+                    <button
+                      type='submit'
+                      className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded'>
+                      Submit
+                    </button>
+                    <button
+                      type='button'
+                      onClick={closeUpdateModal}
+                      className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded'>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal for add goal_other*/}
+      {isOpen && (
+        <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+          <div className='bg-white p-6 rounded-lg shadow-xl'>
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+              <svg
+                className='h-6 w-6'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M6 18L18 6M6 6l12 12'
+                />
+              </svg>
+            </button>
+            {/* Form Content */}
+            <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+              <div className='bg-white p-6 rounded-lg shadow-xl w-96'>
+                <button
+                  // onClick={onClose}
+                  className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+                  <svg
+                    className='h-6 w-6'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'>
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M6 18L18 6M6 6l12 12'
+                    />
+                  </svg>
+                </button>
+
+                <form onSubmit={handleSubmitGoalOther}>
+                  <label htmlFor='name'>Goal :</label>
+                  <input
+                    type='text'
+                    id='name'
+                    name='name'
+                    value={goalOther}
+                    onChange={handleChangeGoalOther}
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'
+                  />
+                  <div className='flex justify-between'>
+                    <button
+                      type='submit'
+                      className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded'>
+                      Submit
+                    </button>
+                    <button
+                      type='button'
+                      onClick={closeModal}
+                      className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded'>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

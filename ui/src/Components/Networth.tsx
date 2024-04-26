@@ -12,11 +12,12 @@ interface FormData {
 }
 
 const Networth: React.FC = () => {
+  //Temporary data
   const [datas, setDatas] = useState<any[]>([])
-
+  //Modal
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
-
+  //FormData
   const [formData, setFormData] = useState<FormData>({
     id: 0,
     name: '',

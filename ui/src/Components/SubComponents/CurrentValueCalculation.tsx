@@ -2,29 +2,24 @@ import { useEffect, useState } from 'react'
 import NetworthFinder from '../../Apis/NetworthFinder'
 
 interface Data {
-  id: number
-  name: string
+  goal_ultimate_id: number
   value: number
-  base_value: number
-  investment: boolean
 }
 
 interface CalculationProps {
-  type: string
+  id: number
 }
 
-const Calculation: React.FC<CalculationProps> = ({ type }) => {
+const Calculation: React.FC<CalculationProps> = ({ id }) => {
   const [datas, setDatas] = useState<Data[]>([])
-  const [totalProfit, setTotalProfit] = useState(0)
+  const [totalCurrentValue, setTotalCurrentValue] = useState(0)
   let value = 0
-  let capital = 0
 
   const calc = () => {
     for (let i = 0; i < datas.length; i++) {
       value = value + datas[i].value
-      capital = capital + datas[i].base_value
     }
-    setTotalProfit(value - capital)
+    setTotalCurrentValue(value)
   }
 
   useEffect(() => {
@@ -34,7 +29,7 @@ const Calculation: React.FC<CalculationProps> = ({ type }) => {
         if (response.data.data.networth.length !== 0) {
           // Filter and update datas state with only invest true data
           const filteredData: Data[] = response.data.data.networth.filter(
-            (data: Data) => data.investment
+            (data: Data) => data.goal_ultimate_id === id
           )
           setDatas(filteredData)
         }
@@ -51,8 +46,8 @@ const Calculation: React.FC<CalculationProps> = ({ type }) => {
     calc()
   }, [datas])
 
-  if (datas && type === 'profit') {
-    return <>{totalProfit}</>
+  if (datas) {
+    return <>{totalCurrentValue}</>
   }
 }
 
