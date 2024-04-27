@@ -29,7 +29,7 @@ app.get("/networth", async (req, res) => {
 app.post("/networth", async (req, res) => {
   try {
     const results = await db.query(
-      "INSERT INTO networth (name, value, base_value, investment) values ($1,$2,$3,$4) RETURNING *",
+      "INSERT INTO networth (name, value, base_value, investment) VALUES ($1,$2,$3,$4) RETURNING *",
       [req.body.name, req.body.value, req.body.base_value, req.body.investment]
     );
     res.status(201).json({
@@ -47,7 +47,7 @@ app.post("/networth", async (req, res) => {
 //DELETE a networth
 app.delete("/networth/:id", async (req, res) => {
   try {
-    const results = await db.query("DELETE FROM networth where id =$1", [
+    const results = await db.query("DELETE FROM networth WHERE id =$1", [
       req.params.id,
     ]);
     res.status(204).json({
@@ -105,7 +105,7 @@ app.get("/networth/time", async (req, res) => {
 app.post("/networth/time", async (req, res) => {
   try {
     const results = await db.query(
-      "INSERT INTO networth_time (total_networth, monthly_income, investment_profit, monthly_profit) values ($1,$2,$3,$4) RETURNING *",
+      "INSERT INTO networth_time (total_networth, monthly_income, investment_profit, monthly_profit) VALUES ($1,$2,$3,$4) RETURNING *",
       [
         req.body.total_networth,
         req.body.monthly_income,
@@ -120,6 +120,82 @@ app.post("/networth/time", async (req, res) => {
       },
     });
     console.log("API Called : Add a networth_time");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//////////////////////////////////////////////BUSINESS///////////////////////////////////////////////////////
+//GET all business
+app.get("/business", async (req, res) => {
+  try {
+    const results = await db.query("SELECT * FROM business");
+    res.status(200).json({
+      status: "success",
+      data: {
+        business: results.rows,
+      },
+    });
+    console.log("API Called : Get all business");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//CREATE a business
+app.post("/business", async (req, res) => {
+  try {
+    const results = await db.query(
+      "INSERT INTO business (name, revenue, capital, status) VALUES ($1,$2,$3,$4) RETURNING *",
+      [req.body.name, req.body.revenue, req.body.capital, req.body.status]
+    );
+    res.status(201).json({
+      status: "success",
+      data: {
+        business: results.rows[0],
+      },
+    });
+    console.log("API Called : Add a business");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//DELETE a business
+app.delete("/business/:id", async (req, res) => {
+  try {
+    const results = await db.query("DELETE FROM business WHERE id =$1", [
+      req.params.id,
+    ]);
+    res.status(204).json({
+      status: "success",
+    });
+    console.log("API Called : Delete a business");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//UPDATE a business
+app.put("/business", async (req, res) => {
+  try {
+    const results = await db.query(
+      "UPDATE business SET name=$1, revenue=$2, capital=$3, status=$4 WHERE id=$5 RETURNING *",
+      [
+        req.body.name,
+        req.body.revenue,
+        req.body.capital,
+        req.body.status,
+        req.body.id,
+      ]
+    );
+    res.status(200).json({
+      status: "success",
+      data: {
+        business: results.rows[0],
+      },
+    });
+    console.log("API Called : Update a business");
   } catch (error) {
     console.log(error);
   }
@@ -146,7 +222,7 @@ app.get("/goal/ultimate", async (req, res) => {
 app.post("/goal/ultimate", async (req, res) => {
   try {
     const results = await db.query(
-      "INSERT INTO goal_ultimate (name, target_value, current_value) values ($1,$2,$3) RETURNING *",
+      "INSERT INTO goal_ultimate (name, target_value, current_value) VALUES ($1,$2,$3) RETURNING *",
       [
         req.body.name,
         req.body.target_value,
@@ -212,7 +288,7 @@ app.get("/goal/other", async (req, res) => {
 app.post("/goal/other", async (req, res) => {
   try {
     const results = await db.query(
-      "INSERT INTO goal_other (name, complete_status) values ($1,$2) RETURNING *",
+      "INSERT INTO goal_other (name, complete_status) VALUES ($1,$2) RETURNING *",
       [
         req.body.name,
         req.body.complete_status
@@ -233,13 +309,141 @@ app.post("/goal/other", async (req, res) => {
 //DELETE a goal_other
 app.delete("/goal/other/:id", async (req, res) => {
   try {
-    const results = await db.query("DELETE FROM goal_other where id =$1", [
+    const results = await db.query("DELETE FROM goal_other WHERE id =$1", [
       req.params.id,
     ]);
     res.status(204).json({
       status: "success",
     });
     console.log("API Called : Delete a goal_other");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//////////////////////////////////////////////Skill_Type//////////////////////////////////////////////
+//GET all Skill_Type
+app.get("/skill/type", async (req, res) => {
+  try {
+    const results = await db.query("SELECT * FROM skill_type");
+    res.status(200).json({
+      status: "success",
+      data: {
+        skill_type: results.rows,
+      },
+    });
+    console.log("API Called : Get all skill_type");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//CREATE a skill_type
+app.post("/skill/type", async (req, res) => {
+  try {
+    const results = await db.query(
+      "INSERT INTO skill_type (name) values ($1) RETURNING *",
+      [req.body.name]
+    );
+    res.status(201).json({
+      status: "success",
+      data: {
+        skill_type: results.rows[0],
+      },
+    });
+    console.log("API Called : Add a skill_type");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//DELETE a skill_type
+app.delete("/skill/type/:id", async (req, res) => {
+  try {
+    const results = await db.query("DELETE FROM skill_type WHERE id =$1", [
+      req.params.id,
+    ]);
+    res.status(204).json({
+      status: "success",
+    });
+    console.log("API Called : Delete a skill_type");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//UPDATE a skill_type
+app.put("/skill/type", async (req, res) => {
+  try {
+    const results = await db.query(
+      "UPDATE skill_type SET name=$1 WHERE id=$2 RETURNING *",
+      [
+        req.body.name,
+        req.body.id,
+      ]
+    );
+    res.status(200).json({
+      status: "success",
+      data: {
+        skill_type: results.rows[0],
+      },
+    });
+    console.log("API Called : Update a skill_type");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//////////////////////////////////////////////Skill//////////////////////////////////////////////
+//GET all Skill
+app.get("/skill", async (req, res) => {
+  try {
+    const results = await db.query("SELECT * FROM skill");
+    res.status(200).json({
+      status: "success",
+      data: {
+        skill: results.rows,
+      },
+    });
+    console.log("API Called : Get all skill");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//CREATE a Skill
+app.post("/skill", async (req, res) => {
+  try {
+    const results = await db.query(
+      "INSERT INTO skill (name, complete_status, skill_type_id) VALUES ($1,$2,$3) RETURNING *",
+      [
+        req.body.name,
+        req.body.complete_status,
+        req.body.skill_type_id
+      ]
+    );
+    res.status(201).json({
+      status: "success",
+      data: {
+        skill: results.rows[0],
+      },
+    });
+    console.log("API Called : Add a skill");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//DELETE a Skill
+app.delete("/skill/:id", async (req, res) => {
+  try {
+    const results = await db.query("DELETE FROM skill WHERE id =$1", [
+      req.params.id,
+    ]);
+    res.status(204).json({
+      status: "success",
+    });
+    console.log("API Called : Delete a skill");
   } catch (error) {
     console.log(error);
   }

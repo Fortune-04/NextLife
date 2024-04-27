@@ -1,29 +1,29 @@
 import { useState, useEffect } from 'react'
-import NetworthFinder from '../Apis/NetworthFinder'
+import BusinessFinder from '../../Apis/BusinessFinder'
 
 import { PlusIcon } from '@heroicons/react/24/solid'
 
 interface FormData {
   id: number
   name: string
-  value: number
-  base_value: number
-  investment: boolean
+  revenue: number
+  capital: number
+  status: boolean
 }
 
-const Networth: React.FC = () => {
+const BusinessItem: React.FC = () => {
   //Temporary data
   const [datas, setDatas] = useState<any[]>([])
   //Modal
-  const [isOpen, setIsOpen] = useState(false)
+  const [isAddOpen, setIsAddOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
   //FormData
   const [formData, setFormData] = useState<FormData>({
     id: 0,
     name: '',
-    value: 0,
-    base_value: 0,
-    investment: false,
+    revenue: 0,
+    capital: 0,
+    status: false,
   })
 
   const handleChange = (
@@ -36,28 +36,28 @@ const Networth: React.FC = () => {
     }))
   }
 
-  const openModal = () => {
-    setIsOpen(true)
+  const openAddModal = () => {
+    setIsAddOpen(true)
   }
 
-  const closeModal = () => {
-    setIsOpen(false)
+  const closeAddModal = () => {
+    setIsAddOpen(false)
   }
 
   const openUpdateModal = (
     id: number,
     name: string,
-    value: number,
-    base_value: number,
-    investment: boolean
+    revenue: number,
+    capital: number,
+    status: boolean
   ) => {
     setFormData({
       ...formData,
       id: id,
       name: name,
-      value: value,
-      base_value: base_value,
-      investment: investment,
+      revenue: revenue,
+      capital: capital,
+      status: status,
     })
     setIsUpdateOpen(true)
   }
@@ -67,9 +67,9 @@ const Networth: React.FC = () => {
       ...formData, // Keep existing state for other fields
       id: 0,
       name: '',
-      value: 0,
-      base_value: 0,
-      investment: false,
+      revenue: 0,
+      capital: 0,
+      status: false,
     })
     setIsUpdateOpen(false)
   }
@@ -79,22 +79,21 @@ const Networth: React.FC = () => {
     try {
       const body = {
         name: formData.name,
-        value: formData.value,
-        base_value: formData.base_value,
-        investment: formData.investment,
+        revenue: formData.revenue,
+        capital: formData.capital,
+        status: formData.status,
       }
-      console.log(body)
-      const response = await NetworthFinder.post('/', body)
+      const response = await BusinessFinder.post('/', body)
       fetchData()
     } catch (error) {
       console.log(error)
     }
-    closeModal() // Close the modal after form submission
+    closeAddModal() // Close the modal after form submission
   }
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await NetworthFinder.delete(`/${id}`)
+      const response = await BusinessFinder.delete(`/${id}`)
       setDatas(
         datas.filter((data) => {
           return data.id !== id
@@ -114,11 +113,11 @@ const Networth: React.FC = () => {
       const body = {
         id: formData.id,
         name: formData.name,
-        value: formData.value,
-        base_value: formData.base_value,
-        investment: formData.investment,
+        revenue: formData.revenue,
+        capital: formData.capital,
+        status: formData.status,
       }
-      const response = await NetworthFinder.put(`/`, body)
+      const response = await BusinessFinder.put(`/`, body)
       setDatas([])
       fetchData()
     } catch (error) {
@@ -129,11 +128,10 @@ const Networth: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const response = await NetworthFinder.get('/')
-      console.log(response.data)
-      if (response.data.data.networth.length !== 0) {
+      const response = await BusinessFinder.get('/')
+      if (response.data.data.business.length !== 0) {
         // Update state once with all the data
-        setDatas(response.data.data.networth)
+        setDatas(response.data.data.business)
       }
     } catch (error) {
       console.log(error)
@@ -146,58 +144,58 @@ const Networth: React.FC = () => {
 
   return (
     <>
-      {/* <div className='h-[41rem] overflow-auto bg-white p-4 rounded-sm flex flex-col flex-1'> */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-        {datas &&
-          datas.map((data) => (
-            <div
-              key={data.id}
-              className='bg-white rounded-lg overflow-hidden shadow-md border border-gray-200'>
-              <div className='p-6'>
-                <h2 className='text-lg font-semibold mb-4'>{data.name}</h2>
-                <p className='text-gray-700'>{data.value}</p>
-              </div>
-              <div className='flex flex-col h-full bg-gray-100'>
-                {/* <div className='p-6'></div>{' '} */}
-                {/* Placeholder to maintain space */}
-                <div className='flex'>
-                  <button
-                    className='flex-1 bg-white text-black px-4 py-2 border border-gray-200'
-                    onClick={() =>
-                      openUpdateModal(
-                        data.id,
-                        data.name,
-                        data.value,
-                        data.base_value,
-                        data.investment
-                      )
-                    }>
-                    Edit
-                  </button>
-                  <button
-                    className='flex-1 bg-red-500 text-white px-4 py-2 border border-gray-200'
-                    onClick={() => handleDelete(data.id)}>
-                    Delete
-                  </button>
+      <div className='h-[35rem] overflow-auto bg-white p-4 rounded-sm flex flex-col flex-1'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+          {datas &&
+            datas.map((data) => (
+              <div
+                key={data.id}
+                className='bg-white rounded-lg overflow-hidden shadow-md border border-gray-200'>
+                <div className='p-6'>
+                  <h2 className='text-lg font-semibold mb-4'>{data.name}</h2>
+                  <p className='text-gray-700'>Revenue : RM{data.revenue}</p>
+                </div>
+                <div className='flex flex-col h-full bg-gray-100'>
+                  {/* <div className='p-6'></div>{' '} */}
+                  {/* Placeholder to maintain space */}
+                  <div className='flex'>
+                    <button
+                      className='flex-1 bg-white text-black px-4 py-2 border border-gray-200'
+                      onClick={() =>
+                        openUpdateModal(
+                          data.id,
+                          data.name,
+                          data.revenue,
+                          data.capital,
+                          data.status
+                        )
+                      }>
+                      Edit
+                    </button>
+                    <button
+                      className='flex-1 bg-red-500 text-white px-4 py-2 border border-gray-200'
+                      onClick={() => handleDelete(data.id)}>
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        <div
-          className='bg-white shadow-md rounded-lg p-6 flex flex-col border border-gray-200 items-center justify-center w-70 h-40'
-          onClick={openModal}>
-          <PlusIcon className='h-10 w-10 text-gray-500' />
-          {/* <span className='mt-2'>Card Content</span> */}
+            ))}
+          <div
+            className='bg-white shadow-md rounded-lg p-6 flex flex-col border border-gray-200 items-center justify-center w-70 h-40'
+            onClick={openAddModal}>
+            <PlusIcon className='h-10 w-10 text-gray-500' />
+            {/* <span className='mt-2'>Card Content</span> */}
+          </div>
         </div>
       </div>
-      {/* </div> */}
       {/* Modal for update networth*/}
       {isUpdateOpen && (
         <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
           <div className='bg-white p-6 rounded-lg shadow-xl'>
             {/* Close Button */}
             <button
-              onClick={closeModal}
+              onClick={closeAddModal}
               className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
               <svg
                 className='h-6 w-6'
@@ -244,31 +242,31 @@ const Networth: React.FC = () => {
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
 
-                  <label htmlFor='value'>Value:</label>
+                  <label htmlFor='revenue'>Revenue:</label>
                   <input
                     type='number'
-                    id='value'
-                    name='value'
-                    value={formData.value}
+                    id='revenue'
+                    name='revenue'
+                    value={formData.revenue}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
 
-                  <label htmlFor='target_value'>Target value:</label>
+                  <label htmlFor='capital'>Capital:</label>
                   <input
                     type='number'
-                    id='base_value'
-                    name='base_value'
-                    value={formData.base_value}
+                    id='capital'
+                    name='capital'
+                    value={formData.capital}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
 
-                  <label htmlFor='investment'>Investment?</label>
+                  <label htmlFor='status'>Operate?</label>
                   <select
-                    id='investment'
-                    name='investment'
-                    value={formData.investment ? 'true' : 'false'}
+                    id='status'
+                    name='status'
+                    value={formData.status ? 'true' : 'false'}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
                     <option value=''>Select Type</option>
@@ -296,12 +294,12 @@ const Networth: React.FC = () => {
         </div>
       )}
       {/* Modal for add networth*/}
-      {isOpen && (
+      {isAddOpen && (
         <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
           <div className='bg-white p-6 rounded-lg shadow-xl'>
             {/* Close Button */}
             <button
-              onClick={closeModal}
+              onClick={closeAddModal}
               className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
               <svg
                 className='h-6 w-6'
@@ -348,31 +346,31 @@ const Networth: React.FC = () => {
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
 
-                  <label htmlFor='value'>Value:</label>
+                  <label htmlFor='revenue'>Revenue:</label>
                   <input
                     type='number'
-                    id='value'
-                    name='value'
-                    value={formData.value}
+                    id='revenue'
+                    name='revenue'
+                    value={formData.revenue}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
 
-                  <label htmlFor='target_value'>Target value:</label>
+                  <label htmlFor='capital'>Capital:</label>
                   <input
                     type='number'
-                    id='base_value'
-                    name='base_value'
-                    value={formData.base_value}
+                    id='capital'
+                    name='capital'
+                    value={formData.capital}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
 
-                  <label htmlFor='investment'>Investment?</label>
+                  <label htmlFor='status'>Operate?</label>
                   <select
-                    id='investment'
-                    name='investment'
-                    value={formData.investment ? 'true' : 'false'}
+                    id='status'
+                    name='status'
+                    value={formData.status ? 'true' : 'false'}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
                     <option value=''>Select Type</option>
@@ -388,7 +386,7 @@ const Networth: React.FC = () => {
                     </button>
                     <button
                       type='button'
-                      onClick={closeModal}
+                      onClick={closeAddModal}
                       className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded'>
                       Cancel
                     </button>
@@ -403,4 +401,4 @@ const Networth: React.FC = () => {
   )
 }
 
-export default Networth
+export default BusinessItem

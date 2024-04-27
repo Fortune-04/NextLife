@@ -33,7 +33,9 @@ const Goal: React.FC = () => {
     status: false,
   })
 
-  const handleChangeGoalOther = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleChangeGoalOther = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     // Update the state with the new value entered by the user
     setGoalOther(event.target.value)
   }
