@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import path from 'node:path'
 import electron from 'vite-plugin-electron/simple'
 import react from '@vitejs/plugin-react'
+import paths from "path"
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -23,4 +24,9 @@ export default defineConfig({
       renderer: {},
     }),
   ],
+  resolve: {
+    alias: {
+      "@": paths.resolve(__dirname, "./src"),
+    },
+  },
 })

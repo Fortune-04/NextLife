@@ -7,12 +7,17 @@ import { CreditCardIcon } from '@heroicons/react/24/solid'
 import { ChevronDoubleUpIcon } from '@heroicons/react/24/solid'
 import { ChevronDoubleDownIcon } from '@heroicons/react/24/solid'
 
+import { DataTable } from '@/Components/ui/data-table'
+import { columns } from '@/Components/ui/columns'
+
 interface Data {
   id: number
   name: string
   value: number
   base_value: number
   investment: boolean
+  profit_myr: number
+  profit_percentage: number
   date: Date
 }
 
@@ -44,7 +49,17 @@ const Investment = () => {
           const filteredData: Data[] = response.data.data.networth.filter(
             (data: Data) => data.investment
           )
-          setDatas(filteredData)
+          const updatedData: Data[] = filteredData.map((data: Data) => ({
+            ...data,
+            profit_myr: data.value - data.base_value, // Calculate initial profit_myr
+            profit_percentage: parseFloat(
+              (
+                ((data.value - data.base_value) / data.base_value) *
+                100
+              ).toFixed(2)
+            ), // Calculate initial profit_percentage
+          }))
+          setDatas(updatedData)
         }
       } catch (error) {
         console.log(error)
@@ -121,7 +136,7 @@ const Investment = () => {
           </div>
         </BoxWrapper>
       </div>
-      <div className='h-[35rem] mt-3 overflow-auto bg-white p-4 rounded-sm border border-gray-200 flex flex-col flex-1'>
+      {/* <div className='h-[35rem] mt-3 overflow-auto bg-white p-4 rounded-sm border border-gray-200 flex flex-col flex-1'>
         <table className='min-w-full divide-y divide-gray-200'>
           <thead className='bg-gray-50'>
             <tr>
@@ -176,6 +191,44 @@ const Investment = () => {
               ))}
           </tbody>
         </table>
+      </div> */}
+      {/* <div className='h-[35rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'>
+        <Table> */}
+      {/* <TableCaption>A list of your recent invoices.</TableCaption> */}
+      {/* <TableHeader>
+            <TableRow>
+              <TableHead className='w-[100px]'>Investment</TableHead>
+              <TableHead className='text-right'>Total (MYR)</TableHead>
+              <TableHead className='text-right'>Capital (MYR)</TableHead>
+              <TableHead className='text-right'>Profit (MYR)</TableHead>
+              <TableHead className='text-right'>Profit (%)</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {datas &&
+              datas.map((data) => (
+                <TableRow key={data.id}>
+                  <TableCell className='font-medium'>{data.name}</TableCell>
+                  <TableCell className='text-right'>{data.value}</TableCell>
+                  <TableCell className='text-right'>
+                    {data.base_value}
+                  </TableCell>
+                  <TableCell className='text-right'>
+                    {data.value - data.base_value}
+                  </TableCell>
+                  <TableCell className='text-right'>
+                    {(
+                      ((data.value - data.base_value) / data.base_value) *
+                      100
+                    ).toFixed(2)}
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </div> */}
+      <div className='h-[35rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'>
+        <DataTable columns={columns} data={datas} />
       </div>
     </>
   )
