@@ -144,7 +144,7 @@ const BusinessItem: React.FC = () => {
 
   return (
     <>
-      <div className='h-[35rem] overflow-auto bg-white p-4 rounded-sm flex flex-col flex-1'>
+      <div className='h-[35rem] overflow-auto bg-white rounded-sm flex flex-col flex-1'>
         <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
           {datas &&
             datas.map((data) => (

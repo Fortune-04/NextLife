@@ -83,7 +83,7 @@ const Business = () => {
           </div>
         </BoxWrapper>
       </div>
-      <div className='h-[35rem] mt-3 bg-white p-3 rounded-sm border border-gray-400 flex flex-col flex-1'>
+      <div className='h-[35rem] mt-3 bg-white p-4 rounded-sm border border-gray-200 flex flex-col flex-1'>
         {/* <ResponsiveContainer width='100%' height='100%'>
           <LineChart
             width={1000}
