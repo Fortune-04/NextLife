@@ -136,62 +136,6 @@ const Investment = () => {
           </div>
         </BoxWrapper>
       </div>
-      {/* <div className='h-[35rem] mt-3 overflow-auto bg-white p-4 rounded-sm border border-gray-200 flex flex-col flex-1'>
-        <table className='min-w-full divide-y divide-gray-200'>
-          <thead className='bg-gray-50'>
-            <tr>
-              <th
-                scope='col'
-                className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                Investment
-              </th>
-              <th
-                scope='col'
-                className='px-6 py-3 text-left text-xs text-center align-middle font-medium text-gray-500 uppercase tracking-wider'>
-                Total (MYR)
-              </th>
-              <th
-                scope='col'
-                className='px-6 py-3 text-left text-xs text-center align-middle font-medium text-gray-500 uppercase tracking-wider'>
-                Capital (MYR)
-              </th>
-              <th
-                scope='col'
-                className='px-6 py-3 text-left text-xs text-center align-middle font-medium text-gray-500 uppercase tracking-wider'>
-                Profit (MYR)
-              </th>
-              <th
-                scope='col'
-                className='px-6 py-3 text-left text-xs text-center align-middle font-medium text-gray-500 uppercase tracking-wider'>
-                Profit (%)
-              </th>
-            </tr>
-          </thead>
-          <tbody className='bg-white divide-y divide-gray-200'>
-            {datas &&
-              datas.map((data) => (
-                <tr key={data.id}>
-                  <td className='px-6 py-4 whitespace-nowrap'>{data.name}</td>
-                  <td className='px-6 py-4 text-center align-middle whitespace-nowrap'>
-                    {data.value}
-                  </td>
-                  <td className='px-6 py-4 text-center align-middle whitespace-nowrap'>
-                    {data.base_value}
-                  </td>
-                  <td className='px-6 py-4 text-center align-middle whitespace-nowrap'>
-                    {data.value - data.base_value}
-                  </td>
-                  <td className='px-6 py-4 text-center align-middle whitespace-nowrap'>
-                    {(
-                      ((data.value - data.base_value) / data.base_value) *
-                      100
-                    ).toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div> */}
       {/* <div className='h-[35rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'>
         <Table> */}
       {/* <TableCaption>A list of your recent invoices.</TableCaption> */}
