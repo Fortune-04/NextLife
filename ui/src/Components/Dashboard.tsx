@@ -18,7 +18,7 @@ import {
   Label,
 } from 'recharts'
 
-//API Finder
+//API finder
 import NetworthFinder from '../Apis/NetworthFinder'
 import Networth_TimeFinder from '../Apis/Networth_TimeFinder'
 

@@ -125,6 +125,44 @@ app.post("/networth/time", async (req, res) => {
   }
 });
 
+//////////////////////////////////////////////INVESTMENT_TIME///////////////////////////////////////////
+//GET all investment_time
+app.get("/investment/time", async (req, res) => {
+  try {
+    const results = await db.query("SELECT * FROM investment_time");
+    res.status(200).json({
+      status: "success",
+      data: {
+        investment_time: results.rows,
+      },
+    });
+    console.log("API Called : Get all investment_time");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//CREATE a investment_time
+app.post("/investment/time", async (req, res) => {
+  try {
+    const results = await db.query(
+      "INSERT INTO investment_time (investment_profit) VALUES ($1) RETURNING *",
+      [
+        req.body.investment_profit
+      ]
+    );
+    res.status(201).json({
+      status: "success",
+      data: {
+        investment_time: results.rows[0],
+      },
+    });
+    console.log("API Called : Add invesment_time");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 //////////////////////////////////////////////BUSINESS///////////////////////////////////////////////////////
 //GET all business
 app.get("/business", async (req, res) => {

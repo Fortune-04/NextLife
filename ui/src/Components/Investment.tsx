@@ -1,5 +1,8 @@
 import { useState, useEffect, ReactNode } from 'react'
+
+//API finder
 import NetworthFinder from '../Apis/NetworthFinder'
+import Investment_TimeFinder from '../Apis/Investment_TimeFinder'
 
 //import icon
 import { BuildingLibraryIcon } from '@heroicons/react/24/solid'
@@ -7,10 +10,30 @@ import { CreditCardIcon } from '@heroicons/react/24/solid'
 import { ChevronDoubleUpIcon } from '@heroicons/react/24/solid'
 import { ChevronDoubleDownIcon } from '@heroicons/react/24/solid'
 
+//import shadcn component
 import { DataTable } from '@/Components/ui/data-table'
 import { columns } from '@/Components/ui/columns'
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/Components/ui/carousel'
 
-interface Data {
+//Import Chart
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Label,
+} from 'recharts'
+
+interface InvestData {
   id: number
   name: string
   value: number
@@ -21,13 +44,63 @@ interface Data {
   date: Date
 }
 
+interface InvestTimeData {
+  id: number
+  investment_profit: number
+  date: Date
+}
+
 const Investment = () => {
-  const [datas, setDatas] = useState<Data[]>([])
+  const [datas, setDatas] = useState<InvestData[]>([])
+  const [investTimeDatas, setInvestTimeDatas] = useState<InvestTimeData[]>([])
   const [totalValue, setTotalValue] = useState(0)
   const [totalCapital, setTotalCapital] = useState(0)
   const [totalProfit, setTotalProfit] = useState(0)
   let value = 0
   let capital = 0
+  let investment_profit = totalProfit
+
+  const handleUpdateGraph = async () => {
+    try {
+      const body = { investment_profit }
+      const response = await Investment_TimeFinder.post('/time', body)
+      fetchData()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const processedData = investTimeDatas.map((item) => ({
+    // Extracting date
+    date: new Date(item.date).toLocaleDateString(),
+    value: item.investment_profit,
+  }))
+
+  const page = [
+    <div key='1' className='p-1' style={{ width: '100%', height: '550px' }}>
+      <ResponsiveContainer width='100%' height='100%'>
+        <LineChart
+          data={processedData}
+          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <CartesianGrid strokeDasharray='3 3' />
+          <XAxis dataKey='date' />
+          <YAxis />
+          <Tooltip />
+          <Line
+            type='monotone'
+            dataKey='pv'
+            stroke='#8884d8'
+            activeDot={{ r: 8 }}
+          />
+          <Line type='monotone' dataKey='value' stroke='#82ca9d' />
+        </LineChart>
+      </ResponsiveContainer>
+      <div></div>
+    </div>,
+    <div key='2'>
+      <DataTable columns={columns} data={datas} />
+    </div>,
+  ]
 
   const calc = () => {
     for (let i = 0; i < datas.length; i++) {
@@ -40,16 +113,16 @@ const Investment = () => {
     setTotalProfit(value - capital)
   }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await NetworthFinder.get('/')
-        if (response.data.data.networth.length !== 0) {
-          // Filter and update datas state with only invest true data
-          const filteredData: Data[] = response.data.data.networth.filter(
-            (data: Data) => data.investment
-          )
-          const updatedData: Data[] = filteredData.map((data: Data) => ({
+  const fetchData = async () => {
+    try {
+      const response = await NetworthFinder.get('/')
+      if (response.data.data.networth.length !== 0) {
+        // Filter and update datas state with only invest true data
+        const filteredData: InvestData[] = response.data.data.networth.filter(
+          (data: InvestData) => data.investment
+        )
+        const updatedData: InvestData[] = filteredData.map(
+          (data: InvestData) => ({
             ...data,
             profit_myr: data.value - data.base_value, // Calculate initial profit_myr
             profit_percentage: parseFloat(
@@ -58,15 +131,26 @@ const Investment = () => {
                 100
               ).toFixed(2)
             ), // Calculate initial profit_percentage
-          }))
-          setDatas(updatedData)
-        }
-      } catch (error) {
-        console.log(error)
+          })
+        )
+        setDatas(updatedData)
       }
+    } catch (error) {
+      console.log(error)
     }
 
-    // Call fetchData only once after initial render
+    try {
+      const response = await Investment_TimeFinder.get('/time')
+      console.log(response.data.data.investment_time)
+      if (response.data.data.investment_time.length !== 0) {
+        setInvestTimeDatas(response.data.data.investment_time)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
     fetchData()
   }, [])
 
@@ -78,9 +162,12 @@ const Investment = () => {
     <>
       <div className='flex gap-4'>
         <BoxWrapper>
-          <div className='rounded-full h-12 w-12 flex items-center justify-center bg-sky-500'>
-            <BuildingLibraryIcon className='text-2xl text-white' />
-          </div>
+          <button className='rounded-full h-12 w-12 flex items-center justify-center bg-sky-500'>
+            <BuildingLibraryIcon
+              className='text-2xl text-white'
+              onClick={handleUpdateGraph}
+            />
+          </button>
           <div className='pl-4'>
             <span className='text-sm text-gray-500 font-light'>Total</span>
             <div className='flex items-center'>
@@ -171,9 +258,24 @@ const Investment = () => {
           </TableBody>
         </Table>
       </div> */}
-      <div className='h-[35rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'>
+
+      {/* <Carousel className='w-full max-w-xs'> */}
+      <Carousel className='w-full'>
+        <CarouselContent>
+          {page.map((content, index) => (
+            <CarouselItem key={index}>
+              <div className='h-[34rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'>
+                {content}
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
+      {/* <div className='h-[35rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'>
         <DataTable columns={columns} data={datas} />
-      </div>
+      </div> */}
     </>
   )
 }
