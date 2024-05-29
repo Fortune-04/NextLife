@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
+
+//API finder
 import NetworthFinder from '../Apis/NetworthFinder'
 
+//Import icon
 import { PlusIcon } from '@heroicons/react/24/solid'
 
 interface FormData {
@@ -13,7 +16,7 @@ interface FormData {
 
 const Networth: React.FC = () => {
   //Temporary data
-  const [datas, setDatas] = useState<any[]>([])
+  const [datas, setDatas] = useState<FormData[]>([])
   //Modal
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
@@ -131,9 +134,12 @@ const Networth: React.FC = () => {
     try {
       const response = await NetworthFinder.get('/')
       console.log(response.data)
-      if (response.data.data.networth.length !== 0) {
-        // Update state once with all the data
-        setDatas(response.data.data.networth)
+      const networthData = response.data.data.networth
+      if (networthData.length > 0) {
+        const sortedData = networthData.sort((a: FormData, b: FormData) =>
+          a.name.localeCompare(b.name)
+        )
+        setDatas(sortedData)
       }
     } catch (error) {
       console.log(error)
