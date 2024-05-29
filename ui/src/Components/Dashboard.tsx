@@ -24,6 +24,7 @@ import Networth_TimeFinder from '../Apis/Networth_TimeFinder'
 
 //Import subcomponents
 import InvestmentProfit from './SubComponents/InvestmentProfit'
+import BusinessProfit from './SubComponents/BusinessProfit'
 
 interface Data {
   id: number
@@ -160,7 +161,7 @@ const Dashboard = () => {
             </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                ---
+                $<BusinessProfit type='profit' />
               </strong>
               <span className='text-sm text-red-500 pl-2'>---</span>
             </div>

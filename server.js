@@ -239,6 +239,42 @@ app.put("/business", async (req, res) => {
   }
 });
 
+//////////////////////////////////////////////BUSINESS_TIME///////////////////////////////////////////
+//GET all business_time
+app.get("/business/time", async (req, res) => {
+  try {
+    const results = await db.query("SELECT * FROM business_time");
+    res.status(200).json({
+      status: "success",
+      data: {
+        business_time: results.rows,
+      },
+    });
+    console.log("API Called : Get all business_time");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//CREATE a business_time
+app.post("/business/time", async (req, res) => {
+  try {
+    const results = await db.query(
+      "INSERT INTO business_time (business_profit, total_revenue, total_capital) VALUES ($1,$2,$3) RETURNING *",
+      [req.body.business_profit,req.body.total_revenue, req.body.total_capital]
+    );
+    res.status(201).json({
+      status: "success",
+      data: {
+        business_time: results.rows[0],
+      },
+    });
+    console.log("API Called : Add business_time");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 //////////////////////////////////////////////GOAL_ULTIMATE//////////////////////////////////////////////////
 //GET all Goal_Ultimate
 app.get("/goal/ultimate", async (req, res) => {
