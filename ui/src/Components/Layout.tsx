@@ -9,11 +9,11 @@ const Layout = () => {
   const Menus = [
     { title: 'Dashboard', src: 'Chart_fill', path: '/' },
     { title: 'Investment', src: 'User', path: 'investment' },
+    { title: 'Trading', src: 'Folder', path: 'trading' },
     { title: 'Business', src: 'Chart', path: 'business' },
     { title: 'Networth', src: 'Chat', path: 'networth' },
     { title: 'Goal', src: 'Calendar', gap: true, path: 'goal' },
     { title: 'Skill', src: 'Search', path: 'skill' },
-    // { title: 'Files ', src: 'Folder', gap: true, path: '#' },
     { title: 'Settings', src: 'Setting', gap: true, path: '#' },
   ]
 

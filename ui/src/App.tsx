@@ -7,6 +7,7 @@ import Networth from './Components/Networth'
 import Skill from './Components/Skill'
 import Goal from './Components/Goal'
 import Business from './Components/Business'
+import Trading from './Components/Trading'
 
 import './App.css'
 
@@ -19,6 +20,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path='networth' element={<Networth />} />
             <Route path='investment' element={<Investment />} />
+            <Route path='trading' element={<Trading />} />
             <Route path='business' element={<Business />} />
             <Route path='goal' element={<Goal />} />
             <Route path='skill' element={<Skill />} />

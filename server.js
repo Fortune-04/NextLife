@@ -523,6 +523,48 @@ app.delete("/skill/:id", async (req, res) => {
   }
 });
 
+//////////////////////////////////////////////TRADING_TIME///////////////////////////////////////////
+//GET all trading_time
+app.get("/trading/time", async (req, res) => {
+  try {
+    const results = await db.query("SELECT * FROM trading_time");
+    res.status(200).json({
+      status: "success",
+      data: {
+        trading_time: results.rows,
+      },
+    });
+    console.log("API Called : Get all trading_time");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//CREATE a trading_time
+app.post("/trading/time", async (req, res) => {
+  try {
+    const results = await db.query(
+      "INSERT INTO trading_time (total, prev_profit, avg_profit, avg_profit_percentage, total_profit) VALUES ($1,$2,$3,$4,$5) RETURNING *",
+      [
+        req.body.total,
+        req.body.prev_profit,
+        req.body.avg_profit,
+        req.body.avg_profit_percentage,
+        req.body.total_profit,
+      ]
+    );
+    res.status(201).json({
+      status: "success",
+      data: {
+        trading_time: results.rows[0],
+      },
+    });
+    console.log("API Called : Add a trading_time");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 //Route
 const port = process.env.PORT;
 app.listen(port, () => {
