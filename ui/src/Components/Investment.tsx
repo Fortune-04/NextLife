@@ -53,16 +53,26 @@ interface InvestTimeData {
 const Investment = () => {
   const [datas, setDatas] = useState<InvestData[]>([])
   const [investTimeDatas, setInvestTimeDatas] = useState<InvestTimeData[]>([])
+
+  //to insert into database
+  const [profit, setProfit] = useState(0)
+  const [total, setTotal] = useState(0)
+  const [capital, setCapital] = useState(0)
+  const [profitPercentage, setProfitPercentage] = useState(0)
+
+  //to display
   const [totalValue, setTotalValue] = useState(0)
+  const [totalValueIncrement, setTotalValueIncrement] = useState(0)
   const [totalCapital, setTotalCapital] = useState(0)
+  const [totalCapitalIncrement, setTotalCapitalIncrement] = useState(0)
   const [totalProfit, setTotalProfit] = useState(0)
-  let value = 0
-  let capital = 0
-  let investment_profit = totalProfit
+  const [totalProfitIncrement, setTotalProfitIncrement] = useState(0)
+  const [totalProfitPercentage, setTotalProfitPercentage] = useState(0)
+  const [totalProfitPercentageIncrement, setTotalProfitPercentageIncrement] = useState(0)
 
   const handleUpdateGraph = async () => {
     try {
-      const body = { investment_profit }
+      const body = { investment_profit: profit, total: total, capital: capital, profit_percentage:  profitPercentage}
       const response = await Investment_TimeFinder.post('/time', body)
       fetchData()
     } catch (error) {
@@ -103,14 +113,18 @@ const Investment = () => {
   ]
 
   const calc = () => {
+    let value = 0
+    let capital = 0
+
     for (let i = 0; i < datas.length; i++) {
       value = value + datas[i].value
       capital = capital + datas[i].base_value
     }
 
-    setTotalValue(value)
-    setTotalCapital(capital)
-    setTotalProfit(value - capital)
+    setTotal(value)
+    setCapital(capital)
+    setProfit(value - capital)
+    setProfitPercentage((((value - capital) / capital) * 100))
   }
 
   const fetchData = async () => {
@@ -144,6 +158,14 @@ const Investment = () => {
       console.log(response.data.data.investment_time)
       if (response.data.data.investment_time.length !== 0) {
         setInvestTimeDatas(response.data.data.investment_time)
+        setTotalValue(response.data.data.investment_time[response.data.data.investment_time.length-1].total)
+        setTotalValueIncrement((response.data.data.investment_time[response.data.data.investment_time.length-1].total)-(response.data.data.investment_time[response.data.data.investment_time.length-2].total))
+        setTotalCapital(response.data.data.investment_time[response.data.data.investment_time.length-1].capital)
+        setTotalCapitalIncrement((response.data.data.investment_time[response.data.data.investment_time.length-1].capital)-(response.data.data.investment_time[response.data.data.investment_time.length-2].capital))
+        setTotalProfit(response.data.data.investment_time[response.data.data.investment_time.length-1].investment_profit)
+        setTotalProfitIncrement((response.data.data.investment_time[response.data.data.investment_time.length-1].investment_profit)-(response.data.data.investment_time[response.data.data.investment_time.length-2].investment_profit))
+        setTotalProfitPercentage(response.data.data.investment_time[response.data.data.investment_time.length-1].profit_percentage)
+        setTotalProfitPercentageIncrement((response.data.data.investment_time[response.data.data.investment_time.length-1].profit_percentage)-(response.data.data.investment_time[response.data.data.investment_time.length-2].profit_percentage))
       }
     } catch (error) {
       console.log(error)
@@ -174,7 +196,7 @@ const Investment = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 {totalValue}
               </strong>
-              <span className='text-sm text-green-500 pl-2'>---</span>
+              {totalValueIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalValueIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalValueIncrement}</span>}
             </div>
           </div>
         </BoxWrapper>
@@ -188,7 +210,7 @@ const Investment = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 {totalCapital}
               </strong>
-              <span className='text-sm text-green-500 pl-2'>---</span>
+              {totalCapitalIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalCapitalIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalCapitalIncrement}</span>}
             </div>
           </div>
         </BoxWrapper>
@@ -204,7 +226,7 @@ const Investment = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 {totalProfit}
               </strong>
-              <span className='text-sm text-red-500 pl-2'>---</span>
+              {totalProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalProfitIncrement}</span>}
             </div>
           </div>
         </BoxWrapper>
@@ -216,9 +238,9 @@ const Investment = () => {
             <span className='text-sm text-gray-500 font-light'>Profit (%)</span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                {((totalProfit / totalCapital) * 100).toFixed(2)}
+                {(totalProfitPercentage).toFixed(2)}
               </strong>
-              <span className='text-sm text-red-500 pl-2'>---</span>
+              {totalProfitPercentageIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalProfitPercentageIncrement.toFixed(2)}</span> : <span className='text-sm text-red-500 pl-2'>{totalProfitPercentageIncrement.toFixed(2)}</span>}
             </div>
           </div>
         </BoxWrapper>

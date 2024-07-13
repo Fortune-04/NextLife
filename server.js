@@ -146,9 +146,12 @@ app.get("/investment/time", async (req, res) => {
 app.post("/investment/time", async (req, res) => {
   try {
     const results = await db.query(
-      "INSERT INTO investment_time (investment_profit) VALUES ($1) RETURNING *",
+      "INSERT INTO investment_time (investment_profit, total, capital, profit_percentage) VALUES ($1,$2,$3,$4) RETURNING *",
       [
-        req.body.investment_profit
+        req.body.investment_profit,
+        req.body.total,
+        req.body.capital,
+        req.body.profit_percentage
       ]
     );
     res.status(201).json({
