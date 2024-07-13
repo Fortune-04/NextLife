@@ -263,8 +263,8 @@ app.get("/business/time", async (req, res) => {
 app.post("/business/time", async (req, res) => {
   try {
     const results = await db.query(
-      "INSERT INTO business_time (business_profit, total_revenue, total_capital) VALUES ($1,$2,$3) RETURNING *",
-      [req.body.business_profit,req.body.total_revenue, req.body.total_capital]
+      "INSERT INTO business_time (business_profit, total_revenue, total_capital, profit_percentage) VALUES ($1,$2,$3, $4) RETURNING *",
+      [req.body.business_profit,req.body.total_revenue, req.body.total_capital, req.body.profit_percentage]
     );
     res.status(201).json({
       status: "success",

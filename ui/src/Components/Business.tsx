@@ -38,26 +38,34 @@ interface BusinessTimeData {
   business_profit: number
   total_revenue: number
   total_capital: number
+  profit_percentage: number
   date: Date
 }
 
 const Business = () => {
   const [datas, setDatas] = useState<any[]>([])
-  const [businessTimeDatas, setBusinessTimeDatas] = useState<
-    BusinessTimeData[]
-  >([])
+  const [businessTimeDatas, setBusinessTimeDatas] = useState<BusinessTimeData[]>([])
+
+  //to insert into the database
+  const [revenue, setRevenue] = useState(0)
+  const [capitals, setCapital] = useState(0)
+  const [profit, setProfit] = useState(0)
+  const [profitPercentage, setProfitPercentage] = useState(0)
+
+  //to display
   const [totalRevenue, setTotalRevenue] = useState(0)
+  const [totalRevenueIncrement, setTotalRevenueIncrement] = useState(0)
   const [totalCapital, setTotalCapital] = useState(0)
+  const [totalCapitalIncrement, setTotalCapitalIncrement] = useState(0)
   const [totalProfit, setTotalProfit] = useState(0)
-  let value = 0
-  let capital = 0
-  let business_profit = totalProfit
-  let total_revenue = totalRevenue
-  let total_capital = totalCapital
+  const [totalProfitIncrement, setTotalProfitIncrement] = useState(0)
+  const [totalProfitPercentage, setTotalProfitPercentage] = useState(0)
+  const [totalProfitPercentageIncrement, setTotalProfitPercentageIncrement] = useState(0)
+  
 
   const handleUpdateGraph = async () => {
     try {
-      const body = { business_profit, total_revenue, total_capital }
+      const body = { business_profit: profit, total_revenue: revenue, total_capital: capitals, profit_percentage: profitPercentage }
       const response = await Business_TimeFinder.post('/', body)
       fetchData()
     } catch (error) {
@@ -110,14 +118,18 @@ const Business = () => {
   ]
 
   const calc = () => {
+    let value = 0
+    let capital = 0
+
     for (let i = 0; i < datas.length; i++) {
       value = value + datas[i].revenue
       capital = capital + datas[i].capital
     }
 
-    setTotalRevenue(value)
-    setTotalCapital(capital)
-    setTotalProfit(value - capital)
+    setRevenue(value)
+    setCapital(capital)
+    setProfit(value - capital)
+    setProfitPercentage(((value - capital) / capital) * 100)
   }
 
   const fetchData = async () => {
@@ -136,6 +148,14 @@ const Business = () => {
       console.log(response.data.data.business_time)
       if (response.data.data.business_time.length !== 0) {
         setBusinessTimeDatas(response.data.data.business_time)
+        setTotalRevenue(response.data.data.business_time[response.data.data.business_time.length-1].total_revenue)
+        setTotalRevenueIncrement((response.data.data.business_time[response.data.data.business_time.length-1].total_revenue)-(response.data.data.business_time[response.data.data.business_time.length-2].total_revenue))
+        setTotalCapital(response.data.data.business_time[response.data.data.business_time.length-1].total_capital)
+        setTotalCapitalIncrement((response.data.data.business_time[response.data.data.business_time.length-1].total_capital)-(response.data.data.business_time[response.data.data.business_time.length-2].total_capital))
+        setTotalProfit(response.data.data.business_time[response.data.data.business_time.length-1].business_profit)
+        setTotalProfitIncrement((response.data.data.business_time[response.data.data.business_time.length-1].business_profit)-(response.data.data.business_time[response.data.data.business_time.length-2].business_profit))
+        setTotalProfitPercentage(response.data.data.business_time[response.data.data.business_time.length-1].profit_percentage)
+        setTotalProfitPercentageIncrement((response.data.data.business_time[response.data.data.business_time.length-1].profit_percentage)-(response.data.data.business_time[response.data.data.business_time.length-2].profit_percentage))
       }
     } catch (error) {
       console.log(error)
@@ -164,9 +184,9 @@ const Business = () => {
             <span className='text-sm text-gray-500 font-light'>Revenue</span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                {totalRevenue}
+                ${totalRevenue}
               </strong>
-              <span className='text-sm text-green-500 pl-2'>---</span>
+              {totalRevenueIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalRevenueIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalRevenueIncrement}</span>}
             </div>
           </div>
         </BoxWrapper>
@@ -178,9 +198,9 @@ const Business = () => {
             <span className='text-sm text-gray-500 font-light'>Capital</span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                {totalCapital}
+                ${totalCapital}
               </strong>
-              <span className='text-sm text-green-500 pl-2'>---</span>
+              {totalCapitalIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalCapitalIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalCapitalIncrement}</span>}
             </div>
           </div>
         </BoxWrapper>
@@ -194,9 +214,9 @@ const Business = () => {
             </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                {totalProfit}
+                ${totalProfit}
               </strong>
-              <span className='text-sm text-red-500 pl-2'>---</span>
+              {totalProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalProfitIncrement}</span>}
             </div>
           </div>
         </BoxWrapper>
@@ -208,9 +228,9 @@ const Business = () => {
             <span className='text-sm text-gray-500 font-light'>Profit (%)</span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                {((totalProfit / totalCapital) * 100).toFixed(2)}
+                {totalProfitPercentage.toFixed(2)}
               </strong>
-              <span className='text-sm text-red-500 pl-2'>---</span>
+              {totalProfitPercentageIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalProfitPercentageIncrement.toFixed(2)}</span> : <span className='text-sm text-red-500 pl-2'>{totalProfitPercentageIncrement.toFixed(2)}</span>}
             </div>
           </div>
         </BoxWrapper>

@@ -194,7 +194,7 @@ const Investment = () => {
             <span className='text-sm text-gray-500 font-light'>Total</span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                {totalValue}
+                ${totalValue}
               </strong>
               {totalValueIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalValueIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalValueIncrement}</span>}
             </div>
@@ -208,7 +208,7 @@ const Investment = () => {
             <span className='text-sm text-gray-500 font-light'>Capital</span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                {totalCapital}
+                ${totalCapital}
               </strong>
               {totalCapitalIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalCapitalIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalCapitalIncrement}</span>}
             </div>
@@ -224,7 +224,7 @@ const Investment = () => {
             </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                {totalProfit}
+                ${totalProfit}
               </strong>
               {totalProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalProfitIncrement}</span>}
             </div>
