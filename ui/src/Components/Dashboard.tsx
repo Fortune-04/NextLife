@@ -21,10 +21,13 @@ import {
 //API finder
 import NetworthFinder from '../Apis/NetworthFinder'
 import Networth_TimeFinder from '../Apis/Networth_TimeFinder'
+import Trading_TimeFinder from '@/Apis/Trading_TimeFinder'
+import Investment_TimeFinder from '@/Apis/Investment_TimeFinder'
 
 //Import subcomponents
 import InvestmentProfit from './SubComponents/InvestmentProfit'
 import BusinessProfit from './SubComponents/BusinessProfit'
+import Business_TimeFinder from '@/Apis/Business_TimeFinder'
 
 interface Data {
   id: number
@@ -40,6 +43,12 @@ const Dashboard = () => {
   const [income, setIncome] = useState()
   const [preNetworth, setPreNetworth] = useState(0)
   const [datas, setDatas] = useState<Data[]>([])
+  const [totalTradingProfit, setTotalTradingProfit] = useState(0)
+  const [totalTradingProfitIncrement, setTotalTradingProfitIncrement] = useState(0)
+  const [totalInvestProfit, setTotalInvestProfit] = useState(0)
+  const [totalInvestProfitIncrement, setTotalInvestProfitIncrement] = useState(0)
+  const [totalBusinessProfit, setTotalBusinessProfit] = useState(0)
+  const [totalBusinessProfitIncrement, setTotalBusinessProfitIncrement] = useState(0)
 
   const handleUpdate = async () => {
     let monthly_income = total_networth - preNetworth
@@ -62,6 +71,36 @@ const Dashboard = () => {
           totalValue = totalValue + response.data.data.networth[i].value
         }
         setTotal(totalValue)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+
+    try {
+      const response = await Investment_TimeFinder.get('/time')
+      if (response.data.data.investment_time.length !== 0) {
+        setTotalInvestProfit(response.data.data.investment_time[response.data.data.investment_time.length-1].investment_profit)
+        setTotalInvestProfitIncrement((response.data.data.investment_time[response.data.data.investment_time.length-1].investment_profit)-(response.data.data.investment_time[response.data.data.investment_time.length-2].investment_profit))
+      }
+    } catch (error) {
+      console.log(error)
+    }
+
+    try {
+      const response = await Trading_TimeFinder.get('/time')
+      if (response.data.data.trading_time.length !== 0) {
+        setTotalTradingProfit(response.data.data.trading_time[response.data.data.trading_time.length-1].total_profit)
+        setTotalTradingProfitIncrement((response.data.data.trading_time[response.data.data.trading_time.length-1].total_profit)-(response.data.data.trading_time[response.data.data.trading_time.length-2].total_profit))
+      }
+    } catch (error) {
+      console.log(error)
+    }
+
+    try {
+      const response = await Business_TimeFinder.get('/')
+      if (response.data.data.business_time.length !== 0) {
+        setTotalBusinessProfit(response.data.data.business_time[response.data.data.business_time.length-1].business_profit)
+        setTotalBusinessProfitIncrement((response.data.data.business_time[response.data.data.business_time.length-1].business_profit)-(response.data.data.business_time[response.data.data.business_time.length-2].business_profit))
       }
     } catch (error) {
       console.log(error)
@@ -115,7 +154,6 @@ const Dashboard = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 ${total_networth}
               </strong>
-              <span className='text-sm text-green-500 pl-2'>---</span>
             </div>
           </div>
         </BoxWrapper>
@@ -125,13 +163,14 @@ const Dashboard = () => {
           </div>
           <div className='pl-4'>
             <span className='text-sm text-gray-500 font-light'>
-              Monthly Income
+              Investment Profit
             </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                ${income}
+                ${totalInvestProfit}
+                {/* $<InvestmentProfit type='profit' /> */}
               </strong>
-              <span className='text-sm text-green-500 pl-2'>---</span>
+              {totalInvestProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalInvestProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalInvestProfitIncrement}</span>}
             </div>
           </div>
         </BoxWrapper>
@@ -141,13 +180,13 @@ const Dashboard = () => {
           </div>
           <div className='pl-4'>
             <span className='text-sm text-gray-500 font-light'>
-              Investment Profit
+              Trading Profit
             </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                $<InvestmentProfit type='profit' />
+              ${totalTradingProfit}
               </strong>
-              <span className='text-sm text-red-500 pl-2'>---</span>
+              {totalTradingProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalTradingProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalTradingProfitIncrement}</span>}
             </div>
           </div>
         </BoxWrapper>
@@ -161,9 +200,10 @@ const Dashboard = () => {
             </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                $<BusinessProfit type='profit' />
+                ${totalBusinessProfit}
+                {/* $<BusinessProfit type='profit' /> */}
               </strong>
-              <span className='text-sm text-red-500 pl-2'>---</span>
+              {totalBusinessProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalBusinessProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalBusinessProfitIncrement}</span>}
             </div>
           </div>
         </BoxWrapper>
