@@ -44,6 +44,14 @@ const Networth: React.FC = () => {
   }
 
   const closeModal = () => {
+    setFormData({
+      ...formData, // Keep existing state for other fields
+      id: 0,
+      name: '',
+      value: 0,
+      base_value: 0,
+      type: 'Select',
+    })
     setIsOpen(false)
   }
 
