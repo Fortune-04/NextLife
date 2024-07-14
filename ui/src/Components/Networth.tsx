@@ -11,7 +11,7 @@ interface FormData {
   name: string
   value: number
   base_value: number
-  investment: boolean
+  type: string
 }
 
 const Networth: React.FC = () => {
@@ -26,7 +26,7 @@ const Networth: React.FC = () => {
     name: '',
     value: 0,
     base_value: 0,
-    investment: false,
+    type: 'Select',
   })
 
   const handleChange = (
@@ -52,7 +52,7 @@ const Networth: React.FC = () => {
     name: string,
     value: number,
     base_value: number,
-    investment: boolean
+    type: string
   ) => {
     setFormData({
       ...formData,
@@ -60,7 +60,7 @@ const Networth: React.FC = () => {
       name: name,
       value: value,
       base_value: base_value,
-      investment: investment,
+      type: type,
     })
     setIsUpdateOpen(true)
   }
@@ -72,7 +72,7 @@ const Networth: React.FC = () => {
       name: '',
       value: 0,
       base_value: 0,
-      investment: false,
+      type: 'Select',
     })
     setIsUpdateOpen(false)
   }
@@ -84,7 +84,7 @@ const Networth: React.FC = () => {
         name: formData.name,
         value: formData.value,
         base_value: formData.base_value,
-        investment: formData.investment,
+        type: formData.type,
       }
       console.log(body)
       const response = await NetworthFinder.post('/', body)
@@ -119,7 +119,7 @@ const Networth: React.FC = () => {
         name: formData.name,
         value: formData.value,
         base_value: formData.base_value,
-        investment: formData.investment,
+        type: formData.type,
       }
       const response = await NetworthFinder.put(`/`, body)
       setDatas([])
@@ -175,7 +175,7 @@ const Networth: React.FC = () => {
                         data.name,
                         data.value,
                         data.base_value,
-                        data.investment
+                        data.type
                       )
                     }>
                     Edit
@@ -270,16 +270,17 @@ const Networth: React.FC = () => {
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
 
-                  <label htmlFor='investment'>Investment?</label>
+                  <label htmlFor='type'>Type</label>
                   <select
-                    id='investment'
-                    name='investment'
-                    value={formData.investment ? 'true' : 'false'}
+                    id='type'
+                    name='type'
+                    value={formData.type || ''}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
-                    <option value=''>Select Type</option>
-                    <option value='true'>Yes</option>
-                    <option value='false'>No</option>
+                    <option value=''>Select</option>
+                    <option value='saving'>Saving</option>
+                    <option value='invest'>Investment</option>
+                    <option value='trading'>Trading</option>
                   </select>
 
                   <div className='flex justify-between'>
@@ -374,16 +375,17 @@ const Networth: React.FC = () => {
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
 
-                  <label htmlFor='investment'>Investment?</label>
+                  <label htmlFor='type'>Type</label>
                   <select
-                    id='investment'
-                    name='investment'
-                    value={formData.investment ? 'true' : 'false'}
+                    id='type'
+                    name='type'
+                    value={formData.type || ''}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
-                    <option value=''>Select Type</option>
-                    <option value='true'>Yes</option>
-                    <option value='false'>No</option>
+                    <option value=''>Select</option>
+                    <option value='saving'>Saving</option>
+                    <option value='invest'>Investment</option>
+                    <option value='trading'>Trading</option>
                   </select>
 
                   <div className='flex justify-between'>

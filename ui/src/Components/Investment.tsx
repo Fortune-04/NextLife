@@ -41,6 +41,7 @@ interface InvestData {
   investment: boolean
   profit_myr: number
   profit_percentage: number
+  type: string
   date: Date
 }
 
@@ -133,7 +134,7 @@ const Investment = () => {
       if (response.data.data.networth.length !== 0) {
         // Filter and update datas state with only invest true data
         const filteredData: InvestData[] = response.data.data.networth.filter(
-          (data: InvestData) => data.investment
+          (data: InvestData) => data.type === "invest"
         )
         const updatedData: InvestData[] = filteredData.map(
           (data: InvestData) => ({

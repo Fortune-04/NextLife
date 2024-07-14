@@ -29,8 +29,8 @@ app.get("/networth", async (req, res) => {
 app.post("/networth", async (req, res) => {
   try {
     const results = await db.query(
-      "INSERT INTO networth (name, value, base_value, investment) VALUES ($1,$2,$3,$4) RETURNING *",
-      [req.body.name, req.body.value, req.body.base_value, req.body.investment]
+      "INSERT INTO networth (name, value, base_value, type) VALUES ($1,$2,$3,$4) RETURNING *",
+      [req.body.name, req.body.value, req.body.base_value, req.body.type]
     );
     res.status(201).json({
       status: "success",
@@ -63,12 +63,12 @@ app.delete("/networth/:id", async (req, res) => {
 app.put("/networth", async (req, res) => {
   try {
     const results = await db.query(
-      "UPDATE networth SET name=$1, value=$2, base_value=$3, investment=$4 WHERE id=$5 RETURNING *",
+      "UPDATE networth SET name=$1, value=$2, base_value=$3, type=$4 WHERE id=$5 RETURNING *",
       [
         req.body.name,
         req.body.value,
         req.body.base_value,
-        req.body.investment,
+        req.body.type,
         req.body.id,
       ]
     );
