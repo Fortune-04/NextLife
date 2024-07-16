@@ -27,9 +27,7 @@ interface InvestData {
   name: string
   value: number
   base_value: number
-  investment: boolean
-  profit_myr: number
-  profit_percentage: number
+  type: string
   date: Date
 }
 
@@ -47,6 +45,16 @@ interface InvestTimeData {
 const Trading = () => {
   const [datas, setDatas] = useState<InvestData[]>([])
   const [tradingTimeDatas, setTradingTimeDatas] = useState<InvestTimeData[]>([])
+
+  //to insert into the database
+  const [totalValue, setTotalValue] = useState(0)
+  const [profitPercentage, setProfitPercentage] = useState(0)
+  const [totalProfit, setTotalProfit] = useState(0)
+  const [totalPrevProfit, setTotalPrevProfit] = useState(0)
+  const [totalAvgProfit, setTotalAvgProfit] = useState(0)
+  const [totalAvgProfitPercentage, setTotalAvgProfitPercentage] = useState(0)
+
+  //to diplay
   const [total, setTotal] = useState(0)
   const [totalIncrement, setTotalIncrement] = useState(0)
   const [prevProfit, setPrevProfit] = useState(0)
@@ -55,12 +63,10 @@ const Trading = () => {
   const [avgProfitIncrement, setAvgProfitIncrement] = useState(0)
   const [avgProfitPercent, setAvgProfitPercent] = useState(0)
   const [avgProfitPercentIncrement, setAvgProfitPercentIncrement] = useState(0)
-  let total_profit = 0
-  let total_profit_percentage = 0
 
   const handleUpdateGraph = async () => {
     try {
-      const body = { total: total}
+      const body = { total: totalValue, profit_percentage: profitPercentage, total_profit: totalProfit, prev_profit: totalPrevProfit, avg_profit: totalAvgProfit, avg_profit_percent: totalAvgProfitPercentage}
       const response = await Trading_TimeFinder.post('/time', body)
       fetchData()
     } catch (error) {
@@ -75,56 +81,65 @@ const Trading = () => {
   }))
 
   const calc = () => {
-    for (let i = 0; i < tradingTimeDatas.length; i++) {
-      total_profit = total_profit + tradingTimeDatas[i].total_profit
-      total_profit_percentage = total_profit_percentage + tradingTimeDatas[i].profit_percentage
+    let value = 0
+    let capital = 0
+    let profitPercent = 0
+
+    for (let i = 0; i < datas.length; i++) {
+      value = value + datas[i].value
+      capital = capital + datas[i].base_value
     }
 
+    for (let i = 0; i < tradingTimeDatas.length; i++) {
+      profitPercent = profitPercent + tradingTimeDatas[i].profit_percentage
+    }
+
+    let profPercent = (((value - capital) / capital) * 100)
+
     if(tradingTimeDatas.length>1){
-      setTotal(tradingTimeDatas[tradingTimeDatas.length-1].total)
-      setTotalIncrement((tradingTimeDatas[tradingTimeDatas.length-1].total)-(tradingTimeDatas[tradingTimeDatas.length-2].total))
-      setPrevProfit(tradingTimeDatas[tradingTimeDatas.length-1].prev_profit)
-      setPrevProfitIncrement((tradingTimeDatas[tradingTimeDatas.length-1].prev_profit)-(tradingTimeDatas[tradingTimeDatas.length-2].prev_profit))
-      setAvgProfit(tradingTimeDatas[tradingTimeDatas.length-1].avg_profit)
-      setAvgProfitIncrement((tradingTimeDatas[tradingTimeDatas.length-1].avg_profit)-(tradingTimeDatas[tradingTimeDatas.length-2].avg_profit))
-      setAvgProfitPercent(tradingTimeDatas[tradingTimeDatas.length-1].avg_profit_percent) 
-      setAvgProfitPercentIncrement((tradingTimeDatas[tradingTimeDatas.length-1].avg_profit_percent)-(tradingTimeDatas[tradingTimeDatas.length-2].avg_profit_percent))  
+      setTotalValue(value)
+      setProfitPercentage(profPercent)
+      setTotalProfit(value-capital)
+      setTotalPrevProfit((value-capital)-(tradingTimeDatas[tradingTimeDatas.length-1].total_profit)) 
+      setTotalAvgProfit((value-capital)/(tradingTimeDatas.length+1))
+      setTotalAvgProfitPercentage((profitPercent + profPercent) / (tradingTimeDatas.length+1)) 
+    }else{
+      setTotalValue(value)
+      setProfitPercentage(profPercent)
+      setTotalProfit(value-capital)
+      setTotalPrevProfit(value-capital) 
+      setTotalAvgProfit(value-capital)
+      setTotalAvgProfitPercentage(profPercent)
     }
   }
 
   const fetchData = async () => {
-    // TODO: fetch data from networth based on type
-    // try {
-    //   const response = await NetworthFinder.get('/')
-    //   if (response.data.data.networth.length !== 0) {
-    //     // Filter and update datas state with only invest true data
-    //     const filteredData: InvestData[] = response.data.data.networth.filter(
-    //       (data: InvestData) => data.investment
-    //     )
-    //     filteredData.map(
-    //       (data: InvestData) => ({
-    //         ...data,
-    //         profit_myr: data.value - data.base_value, // Calculate initial profit_myr
-    //         profit_percentage: parseFloat(
-    //           (
-    //             ((data.value - data.base_value) / data.base_value) *
-    //             100
-    //           ).toFixed(2)
-    //         ), // Calculate initial profit_percentage
-    //       })
-    //     )
-    //     setDatas(updatedData)
-    //   }
-    // } catch (error) {
-    //   console.log(error)
-    // }
+    try {
+      const response = await NetworthFinder.get('/')
+      if (response.data.data.networth.length !== 0) {
+        // Filter and update datas state with only invest true data
+        const filteredData: InvestData[] = response.data.data.networth.filter(
+          (data: InvestData) => data.type === "trading"
+        )
+        setDatas(filteredData)
+      }
+    } catch (error) {
+      console.log(error)
+    }
 
     try {
       const response = await Trading_TimeFinder.get('/time')
-      console.log(response)
-      console.log(response.data.data.trading_time)
       if (response.data.data.trading_time.length !== 0) {
         setTradingTimeDatas(response.data.data.trading_time)
+
+        setTotal(response.data.data.trading_time[response.data.data.trading_time.length-1].total)
+        setTotalIncrement((response.data.data.trading_time[response.data.data.trading_time.length-1].total)-(response.data.data.trading_time[response.data.data.trading_time.length-2].total))
+        setPrevProfit(response.data.data.trading_time[response.data.data.trading_time.length-1].prev_profit)
+        setPrevProfitIncrement((response.data.data.trading_time[response.data.data.trading_time.length-1].prev_profit)-(response.data.data.trading_time[response.data.data.trading_time.length-2].prev_profit))
+        setAvgProfit(response.data.data.trading_time[response.data.data.trading_time.length-1].avg_profit)
+        setAvgProfitIncrement((response.data.data.trading_time[response.data.data.trading_time.length-1].avg_profit)-(response.data.data.trading_time[response.data.data.trading_time.length-2].avg_profit))
+        setAvgProfitPercent(response.data.data.trading_time[response.data.data.trading_time.length-1].avg_profit_percent)
+        setAvgProfitPercentIncrement((response.data.data.trading_time[response.data.data.trading_time.length-1].avg_profit_percent)-(response.data.data.trading_time[response.data.data.trading_time.length-2].avg_profit_percent))
       }
     } catch (error) {
       console.log(error)
@@ -183,9 +198,9 @@ const Trading = () => {
             </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                ${avgProfit}
+                ${avgProfit.toFixed(2)}
               </strong>
-              {avgProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{avgProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{avgProfitIncrement}</span>}
+              {avgProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{avgProfitIncrement.toFixed(2)}</span> : <span className='text-sm text-red-500 pl-2'>{avgProfitIncrement.toFixed(2)}</span>}
             </div>
           </div>
         </BoxWrapper>
@@ -199,7 +214,7 @@ const Trading = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 {(avgProfitPercent).toFixed(2)}
               </strong>
-              {avgProfitPercentIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{avgProfitPercentIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{avgProfitPercentIncrement}</span>}
+              {avgProfitPercentIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{avgProfitPercentIncrement.toFixed(2)}</span> : <span className='text-sm text-red-500 pl-2'>{avgProfitPercentIncrement.toFixed(2)}</span>}
             </div>
           </div>
         </BoxWrapper>

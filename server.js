@@ -547,13 +547,14 @@ app.get("/trading/time", async (req, res) => {
 app.post("/trading/time", async (req, res) => {
   try {
     const results = await db.query(
-      "INSERT INTO trading_time (total, prev_profit, avg_profit, avg_profit_percentage, total_profit) VALUES ($1,$2,$3,$4,$5) RETURNING *",
+      "INSERT INTO trading_time (total, profit_percentage, total_profit, prev_profit, avg_profit, avg_profit_percent) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *",
       [
         req.body.total,
+        req.body.profit_percentage,
+        req.body.total_profit,
         req.body.prev_profit,
         req.body.avg_profit,
-        req.body.avg_profit_percentage,
-        req.body.total_profit,
+        req.body.avg_profit_percent,
       ]
     );
     res.status(201).json({

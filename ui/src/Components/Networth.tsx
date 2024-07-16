@@ -135,7 +135,7 @@ const Networth: React.FC = () => {
     } catch (error) {
       console.log(error)
     }
-    setIsUpdateOpen(false)
+    closeUpdateModal()
   }
 
   const fetchData = async () => {
