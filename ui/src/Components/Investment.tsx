@@ -88,21 +88,27 @@ const Investment = () => {
   }))
 
   const page = [
-    <div key='1' className='p-1' style={{ width: '100%', height: '550px' }}>
+    <div key='1' style={{ width: '100%', height: '550px' }}>
       <ResponsiveContainer width='100%' height='100%'>
         <LineChart
           data={processedData}
-          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          margin={{ top: 20, right: 15, left: 0, bottom: 20 }}>
           <CartesianGrid strokeDasharray='3 3' />
-          <XAxis dataKey='date' />
+          <XAxis dataKey='date'>
+              <Label
+                value='Profit vs Time'
+                position='insideTop'
+                offset={-500}
+              />
+            </XAxis>
           <YAxis />
           <Tooltip />
-          <Line
+          {/* <Line
             type='monotone'
             dataKey='pv'
             stroke='#8884d8'
             activeDot={{ r: 8 }}
-          />
+          /> */}
           <Line type='monotone' dataKey='value' stroke='#82ca9d' />
         </LineChart>
       </ResponsiveContainer>
@@ -282,24 +288,28 @@ const Investment = () => {
         </Table>
       </div> */}
 
+    <div className='h-[35rem] mt-3 p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
+    {/* <div className='h-[35rem] mt-3 bg-white p-3 rounded-sm border border-gray-200 flex flex-col flex-1'> */}
       {/* <Carousel className='w-full max-w-xs'> */}
       <Carousel className='w-full'>
         <CarouselContent>
           {page.map((content, index) => (
             <CarouselItem key={index}>
-              <div className='h-[34rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'>
+              {/* <div className='h-[34rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'> */}
                 {content}
-              </div>
+              {/* </div> */}
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className='carousel-button previous'/>
+        <CarouselNext className='carousel-button next' />
       </Carousel>
+      </div>
       {/* <div className='h-[35rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'>
         <DataTable columns={columns} data={datas} />
       </div> */}
     </>
+    
   )
 }
 

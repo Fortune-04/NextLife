@@ -221,7 +221,7 @@ const Dashboard = () => {
               <Label
                 value='Networth vs Time'
                 position='insideTop'
-                offset={-497}
+                offset={-499}
               />
             </XAxis>
             <YAxis />

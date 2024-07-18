@@ -74,3 +74,23 @@
       @apply bg-background text-foreground;
     }
   }
+
+  .carousel-button {
+    position: absolute;
+    background-color: white;
+    padding: 0.5rem;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .carousel-button.previous {
+    top: 50%;
+    left: -30px;
+    transform: translateY(-50%);
+  }
+  
+  .carousel-button.next {
+    top: 50%;
+    right: -30px;
+    transform: translateY(-50%);
+  }
