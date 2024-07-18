@@ -86,13 +86,13 @@ const Business = () => {
       <ResponsiveContainer width='100%' height='100%'>
         <LineChart
           data={processedData}
-          margin={{ top: 35, right: 20, left: 0, bottom: 5 }}>
+          margin={{ top: 20, right: 15, left: 0, bottom: 20 }}>
           <CartesianGrid strokeDasharray='3 3' />
           <XAxis dataKey='date'>
             <Label
               value='Revenue/Capital vs Time'
               position='insideTop'
-              offset={-475}
+              offset={-500}
             />
           </XAxis>
           <YAxis />
@@ -235,19 +235,20 @@ const Business = () => {
           </div>
         </BoxWrapper>
       </div>
+
+      <div className='h-[35rem] mt-3 p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
       <Carousel className='w-full'>
         <CarouselContent>
           {page.map((content, index) => (
             <CarouselItem key={index}>
-              <div className='h-[34rem] mt-3 overflow-auto p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
                 {content}
-              </div>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className='carousel-button previous'/>
+        <CarouselNext className='carousel-button next' />
       </Carousel>
+      </div>
     </>
   )
 }
