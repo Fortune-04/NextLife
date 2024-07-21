@@ -299,11 +299,12 @@ app.get("/goal/ultimate", async (req, res) => {
 app.post("/goal/ultimate", async (req, res) => {
   try {
     const results = await db.query(
-      "INSERT INTO goal_ultimate (name, target_value, current_value) VALUES ($1,$2,$3) RETURNING *",
+      "INSERT INTO goal_ultimate (name, target_value, status) VALUES ($1,$2,$3) RETURNING *",
       [
         req.body.name,
         req.body.target_value,
-        req.body.current_value,
+        // req.body.current_value,
+        req.body.status
       ]
     );
     res.status(201).json({
@@ -339,6 +340,21 @@ app.put("/goal/ultimate", async (req, res) => {
       },
     });
     console.log("API Called : Update a goal_ultimate");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//DELETE a Goal_Ultimate
+app.delete("/goal/ultimate/:id", async (req, res) => {
+  try {
+    const results = await db.query("DELETE FROM goal_ultimate WHERE id =$1", [
+      req.params.id,
+    ]);
+    res.status(204).json({
+      status: "success",
+    });
+    console.log("API Called : Delete a goal_ultimate");
   } catch (error) {
     console.log(error);
   }

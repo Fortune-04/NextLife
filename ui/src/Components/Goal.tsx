@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react'
+
+//Import icon
 import { PlusCircleIcon } from '@heroicons/react/24/outline'
+
+//Import components
+import CurrentValueCalculation from '../Components/SubComponents/CurrentValueCalculation'
+
+//API Finder
 import Goal_UltimateFinder from '../Apis/Goal_UltimateFinder'
 import Goal_OtherFinder from '../Apis/Goal_OtherFinder'
-import CurrentValueCalculation from '../Components/SubComponents/CurrentValueCalculation'
+import NetworthFinder from '@/Apis/NetworthFinder'
 
 interface FormData {
   id: number
@@ -13,13 +20,26 @@ interface FormData {
   status: boolean
 }
 
+interface NetworthData {
+  id: number
+  name: string
+  value: number
+  base_value: number
+  goal_ultimate_id: number
+  type: string
+}
+
 const Goal: React.FC = () => {
   //Temporary data
+  const [networthDatas, setNetworthDatas] = useState<NetworthData[]>([])
   const [goalUltimateDatas, setGoalUltimateDatas] = useState<any[]>([])
   const [goalOtherDatas, setGoalOtherDatas] = useState<any[]>([])
   //Tab
   const [activeTab, setActiveTab] = useState<string>('#tab1')
-  //Modal
+  //Goal Ultimate Modal
+  const [isUltiOpen, setIsUltiOpen] = useState(false)
+  const [isUltiUpdateOpen, setIsUltiUpdateOpen] = useState(false)
+  //Goal Other Modal
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
   //FormData
@@ -34,7 +54,7 @@ const Goal: React.FC = () => {
   })
 
   const handleChangeGoalOther = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     // Update the state with the new value entered by the user
     setGoalOther(event.target.value)
@@ -50,11 +70,29 @@ const Goal: React.FC = () => {
     }))
   }
 
+  const openUltimateModal = () => {
+    setIsUltiOpen(true)
+  }
+
+  const closeUltimateModal = () => {
+    setFormData({
+      ...formData,
+      id: 0,
+      name: '',
+      target_value: 0,
+      current_value: 0,
+      image_source: '',
+      status: false,
+    })
+    setIsUltiOpen(false)
+  }
+
   const openModal = () => {
     setIsOpen(true)
   }
 
-  const closeModal = () => {
+  const closeOtherModal = () => {
+    setGoalOther('')
     setIsOpen(false)
   }
 
@@ -80,7 +118,7 @@ const Goal: React.FC = () => {
 
   const closeUpdateModal = () => {
     setFormData({
-      ...formData, // Keep existing state for other fields
+      ...formData,
       id: 0,
       name: '',
       target_value: 0,
@@ -141,6 +179,22 @@ const Goal: React.FC = () => {
     // setIsUpdateOpen(false)
   }
 
+  const handleSubmitGoalUltimate = async (e) => {
+    e.preventDefault()
+    try {
+      const body = {
+        name: formData.name,
+        target_value: formData.target_value,
+        status: false,
+      }
+      const response = await Goal_UltimateFinder.post(`/`, body)
+      fetchData()
+    } catch (error) {
+      console.log(error)
+    }
+    closeUltimateModal()
+  }
+
   const handleSubmitGoalOther = async (e) => {
     e.preventDefault()
     try {
@@ -153,7 +207,20 @@ const Goal: React.FC = () => {
     } catch (error) {
       console.log(error)
     }
-    setIsUpdateOpen(false)
+    closeOtherModal()
+  }
+
+  const handleDeleteGoalUltimate = async (id: number) => {
+    try {
+      const response = await Goal_UltimateFinder.delete(`/${id}`)
+      setGoalUltimateDatas(
+        goalUltimateDatas.filter((data) => {
+          return data.id !== id
+        })
+      )
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   const handleDeleteGoalOther = async (id: number) => {
@@ -164,7 +231,6 @@ const Goal: React.FC = () => {
           return data.id !== id
         })
       )
-      console.log(response)
       // setOpenDelModal(false);
       // setOpenSnackDel(true);
     } catch (err) {
@@ -173,6 +239,16 @@ const Goal: React.FC = () => {
   }
 
   const fetchData = async () => {
+    try {
+      const response = await NetworthFinder.get('/')
+      if (response.data.data.networth.length !== 0) {
+        // Update state once with all the data
+        setNetworthDatas(response.data.data.networth)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+
     try {
       const response = await Goal_UltimateFinder.get('/')
       console.log(response.data)
@@ -204,24 +280,26 @@ const Goal: React.FC = () => {
     <>
       {/* <div className="bg-[url('./src/assets/Cloud.jpeg')] m-auto grid place-items-center"> */}
       {/* <div className="bg-[url('bg.jpg')] m-auto grid place-items-center min-h-screen"> */}
-      <div className='tab-section bg-gray-100 p-5 rounded-lg backdrop-filter backdrop-blur-lg bg-opacity-40 min-h-[650px] border-2 border-indigo-200'>
-        {/* <div className='tab-section bg-gray-100 p-5 rounded-lg backdrop-filter backdrop-blur-lg bg-opacity-40 w-[1000px] min-h-[400px] border-2 border-indigo-200'> */}
-        <div className='flex flex-wrap gap-1'>
+      <div className='tab-section bg-gray-100 p-4 rounded-lg backdrop-filter backdrop-blur-lg bg-opacity-40 min-h-[650px] border-2 border-indigo-200'>
+        <div className='flex flex-wrap gap-2 mb-4'>
           <button
-            className={`p-4 rounded-lg text-gray-700 font-bold hover:bg-gray-300 hover:bg-opacity-40 flex-grow w-80 ${
+            className={`p-4 rounded-lg text-gray-700 font-bold hover:bg-gray-300 hover:bg-opacity-40 flex-grow ${
               activeTab === '#tab1' ? 'bg-indigo-200' : ''
             }`}
-            data-tab-target='#tab1'>
+            data-tab-target='#tab1'
+            onClick={() => setActiveTab('#tab1')}>
             Ultimate
           </button>
           <button
-            className={`p-4 rounded-lg font-bold hover:bg-gray-300 hover:bg-opacity-40 text-gray-700 flex-grow w-80 ${
+            className={`p-4 rounded-lg text-gray-700 font-bold hover:bg-gray-300 hover:bg-opacity-40 flex-grow ${
               activeTab === '#tab2' ? 'bg-indigo-200' : ''
             }`}
-            data-tab-target='#tab2'>
+            data-tab-target='#tab2'
+            onClick={() => setActiveTab('#tab2')}>
             Other
           </button>
         </div>
+
         <div className='mt-4'>
           <div
             id='tab1'
@@ -231,37 +309,44 @@ const Goal: React.FC = () => {
             <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 py-4'>
               {goalUltimateDatas &&
                 goalUltimateDatas.map((data) => (
-                  <div className='w-300 h-60 bg-gray-300 rounded-xl'>
+                  <div
+                    key={data.id}
+                    className='w-full bg-gray-300 rounded-xl shadow-md'>
                     <div className='bg-white rounded-lg overflow-hidden shadow-md flex'>
                       {/* Image Section */}
                       <div className='w-1/2 p-2'>
                         <img
-                          src='./src/assets/Cloud.jpeg'
-                          alt='Your Image'
+                          src={data.image_source || './src/assets/Cloud.jpeg'}
+                          alt={data.name}
                           className='object-cover h-full w-full'
                         />
                       </div>
 
                       {/* Content Section */}
-                      <div className='p-4 flex flex-col justify-between'>
+                      <div className='p-4 flex flex-col justify-between w-1/2'>
                         <div>
-                          <h2 className='text-lg font-semibold mb-1'>
+                          <h2 className='text-2xl font-extrabold mb-2'>
                             {data.name}
                           </h2>
-                          <h2 className='text-lg font-semibold mb-1'>Target</h2>
+                          <h3 className='text-md font-semibold mb-1'>Target</h3>
                           <p className='text-gray-700 mb-2'>
                             {data.target_value}
                           </p>
-                          <h2 className='text-lg font-semibold mb-1'>
+                          <h3 className='text-md font-semibold mb-1'>
                             Current
-                          </h2>
+                          </h3>
                           <p className='text-gray-700 mb-2'>
                             <CurrentValueCalculation id={data.id} />
                           </p>
+                          {/* <h3 className='text-md font-semibold mb-1'>To Go</h3>
+                          <p className='text-gray-700 mb-2'>
+                            {data.target_value} -{' '}
+                            <CurrentValueCalculation id={data.id} />
+                          </p> */}
                         </div>
-                        <div className='mt-4'>
+                        <div className='mt-4 flex justify-between'>
                           <button
-                            className='bg-green-500 text-white px-4 py-2 rounded-lg'
+                            className='bg-green-500 text-white px-4 py-1 rounded-lg hover:bg-green-600'
                             onClick={() =>
                               openUpdateModal(
                                 data.id,
@@ -274,11 +359,21 @@ const Goal: React.FC = () => {
                             }>
                             Update
                           </button>
+                          <button
+                            className='bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600'
+                            onClick={() => handleDeleteGoalUltimate(data.id)}>
+                            Delete
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
                 ))}
+              <div
+                className='w-full h-60 border-4 border-gray-200 rounded-xl flex items-center justify-center cursor-pointer'
+                onClick={openUltimateModal}>
+                <span className='text-gray-500'>Add New Goal</span>
+              </div>
             </div>
           </div>
           <div
@@ -286,23 +381,16 @@ const Goal: React.FC = () => {
             className={`tab-content text-gray-700 ${
               activeTab === '#tab2' ? '' : 'hidden'
             }`}>
-            <div className='grid grid-cols-1 xl:grid-cols-1 gap-4 py-3  '>
+            <div className='grid grid-cols-1 gap-4 py-3'>
               {goalOtherDatas &&
                 goalOtherDatas.map((data) => (
-                  <div className='flex items-center justify-between space-x-4 w-1400 h-12 bg-gray-300 rounded-xl'>
-                    {/* Checkbox */}
-                    {/* <input
-                      type='checkbox'
-                      className='h-4 w-4 text-blue-600 border-gray-300 rounded'
-                    /> */}
-
-                    {/* Sentence */}
+                  <div
+                    key={data.id}
+                    className='flex items-center justify-between space-x-4 w-full bg-gray-300 rounded-xl p-4'>
                     <span className='text-gray-800'>{data.name}</span>
-
-                    {/* Icon */}
                     <svg
                       xmlns='http://www.w3.org/2000/svg'
-                      className='h-6 w-6 text-gray-600'
+                      className='h-6 w-6 text-gray-600 cursor-pointer'
                       fill='none'
                       viewBox='0 0 24 24'
                       stroke='currentColor'
@@ -316,8 +404,12 @@ const Goal: React.FC = () => {
                     </svg>
                   </div>
                 ))}
-              <div className='flex items-center justify-between w-1400 h-12 bg-indigo-100 rounded-xl'>
-                You can do it!
+              <div className='flex items-center justify-between w-full bg-indigo-100 rounded-xl p-4'>
+                <div className='flex-1 text-center'>
+                  <h2 className='text-2xl font-extrabold mb-2'>
+                    You can do it!
+                  </h2>
+                </div>
                 <button
                   className='flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 focus:outline-none'
                   onClick={openModal}>
@@ -325,16 +417,9 @@ const Goal: React.FC = () => {
                 </button>
               </div>
             </div>
-            {/* <h4 className='font-bold mt-9 mb-4 text-2xl'>Settings Info</h4>
-            <p className='text-xl'>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias
-              aspernatur rem itaque doloribus culpa similique rerum provident id
-              quos sed.
-            </p> */}
           </div>
         </div>
       </div>
-      {/* </div> */}
 
       {/* Modal for update goal_ultimate*/}
       {isUpdateOpen && (
@@ -392,8 +477,8 @@ const Goal: React.FC = () => {
                   <label htmlFor='target_value'>Target value:</label>
                   <input
                     type='number'
-                    id='base_value'
-                    name='base_value'
+                    id='target_value'
+                    name='target_value'
                     value={formData.target_value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
@@ -430,13 +515,112 @@ const Goal: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Modal for add goal ultimate*/}
+      {isUltiOpen && (
+        <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+          <div className='bg-white p-6 rounded-lg shadow-xl'>
+            {/* Close Button */}
+            <button
+              onClick={closeUltimateModal}
+              className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+              <svg
+                className='h-6 w-6'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M6 18L18 6M6 6l12 12'
+                />
+              </svg>
+            </button>
+
+            {/* Form Content */}
+            <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+              <div className='bg-white p-6 rounded-lg shadow-xl w-96'>
+                <button
+                  // onClick={onClose}
+                  className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+                  <svg
+                    className='h-6 w-6'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'>
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M6 18L18 6M6 6l12 12'
+                    />
+                  </svg>
+                </button>
+
+                <form onSubmit={handleSubmitGoalUltimate}>
+                  <label htmlFor='name'>Goal :</label>
+                  <input
+                    type='text'
+                    id='name'
+                    name='name'
+                    value={formData.name}
+                    onChange={handleChange}
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'
+                  />
+
+                  <label htmlFor='target_value'>Target :</label>
+                  <input
+                    type='number'
+                    id='target_value'
+                    name='target_value'
+                    value={formData.target_value}
+                    onChange={handleChange}
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'
+                  />
+
+                  <label htmlFor='fund'>Fund :</label>
+                  <select
+                    id='fund'
+                    name='fund'
+                    onChange={handleChange}
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
+                    <option value=''>Select</option>
+                    {networthDatas &&
+                      networthDatas.map((data) => (
+                        <option key={data.id} value='saving'>
+                          {data.name}
+                        </option>
+                      ))}
+                  </select>
+
+                  <div className='flex justify-between'>
+                    <button
+                      type='submit'
+                      className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded'>
+                      Submit
+                    </button>
+                    <button
+                      type='button'
+                      onClick={closeUltimateModal}
+                      className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded'>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal for add goal_other*/}
       {isOpen && (
         <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
           <div className='bg-white p-6 rounded-lg shadow-xl'>
             {/* Close Button */}
             <button
-              onClick={closeModal}
+              onClick={closeOtherModal}
               className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
               <svg
                 className='h-6 w-6'
@@ -473,13 +657,14 @@ const Goal: React.FC = () => {
 
                 <form onSubmit={handleSubmitGoalOther}>
                   <label htmlFor='name'>Goal :</label>
-                  <input
-                    type='text'
+                  <textarea
+                    placeholder='Enter your text here'
                     id='name'
                     name='name'
                     value={goalOther}
                     onChange={handleChangeGoalOther}
-                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'
+                    rows={3}
+                    className='border border-gray-300 rounded-md p-2 mb-2 w-full'
                   />
                   <div className='flex justify-between'>
                     <button
@@ -489,7 +674,7 @@ const Goal: React.FC = () => {
                     </button>
                     <button
                       type='button'
-                      onClick={closeModal}
+                      onClick={closeOtherModal}
                       className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded'>
                       Cancel
                     </button>
