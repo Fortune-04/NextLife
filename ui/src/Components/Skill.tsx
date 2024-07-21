@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react'
+
+//API Finder
 import SkillFinder from '../Apis/SkillFinder'
 import Skill_TypeFinder from '../Apis/Skill_TypeFinder'
+
+//Import icon
 import { PlusIcon } from '@heroicons/react/24/solid'
+
+//Import component
 import SkillList from './SubComponents/SkillList'
 
 interface FormData {
@@ -14,7 +20,7 @@ const Skill: React.FC = () => {
   //Temporary Data
   const [skillTypeDatas, setSkillTypeDatas] = useState<any[]>([])
   //Modal
-  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [isAddSkillOpen, setIsAddSkillOpen] = useState(false)
   //FormData
   const [formData, setFormData] = useState<FormData>({
     skill_type_id: 0,
@@ -32,16 +38,16 @@ const Skill: React.FC = () => {
     }))
   }
 
-  const openAddModal = (skill_type_id: number) => {
+  const openAddSkillModal = (skill_type_id: number) => {
     setFormData({
       ...formData,
       skill_type_id: skill_type_id,
     })
-    setIsAddOpen(true)
+    setIsAddSkillOpen(true)
   }
 
-  const closeAddModal = () => {
-    setIsAddOpen(false)
+  const closeAddSkillModal = () => {
+    setIsAddSkillOpen(false)
   }
 
   const handleSubmitSkill = async (e) => {
@@ -57,7 +63,7 @@ const Skill: React.FC = () => {
     } catch (error) {
       console.log(error)
     }
-    setIsAddOpen(false)
+    setIsAddSkillOpen(false)
   }
 
   const fetchData = async () => {
@@ -96,17 +102,15 @@ const Skill: React.FC = () => {
           {skillTypeDatas &&
             skillTypeDatas.map((data) => (
               <div
-                // className='grid grid-cols-1 grid-flow-col gap-4'
-                key={data.id}>
-                <div className='grid grid-cols-1 xl:grid-cols-1 gap-2 px-2 py-2 border border-2'>
-                  <SkillList id={data.id} />
-                  <div className='w-70 h-24 bg-gray-300 rounded-xl'>
-                    <button
-                      className='flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 focus:outline-none'
-                      onClick={() => openAddModal(data.id)}>
-                      <PlusIcon className='w-6 h-6' />
-                    </button>
-                  </div>
+                key={data.id}
+                className='grid grid-cols-1 xl:grid-cols-1 gap-2 px-2 py-2'>
+                <SkillList id={data.id} />
+                <div className='w-full h-24 bg-gray-300 rounded-xl flex items-center justify-center'>
+                  <button
+                    className='flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 focus:outline-none'
+                    onClick={() => openAddSkillModal(data.id)}>
+                    <PlusIcon className='w-6 h-6' />
+                  </button>
                 </div>
               </div>
             ))}
@@ -114,12 +118,12 @@ const Skill: React.FC = () => {
       </div>
 
       {/* Modal for add skill*/}
-      {isAddOpen && (
+      {isAddSkillOpen && (
         <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
           <div className='bg-white p-6 rounded-lg shadow-xl'>
             {/* Close Button */}
             <button
-              onClick={closeAddModal}
+              onClick={closeAddSkillModal}
               className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
               <svg
                 className='h-6 w-6'
@@ -172,7 +176,7 @@ const Skill: React.FC = () => {
                     </button>
                     <button
                       type='button'
-                      onClick={closeAddModal}
+                      onClick={closeAddSkillModal}
                       className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded'>
                       Cancel
                     </button>
