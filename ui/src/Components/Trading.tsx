@@ -66,7 +66,14 @@ const Trading = () => {
 
   const handleUpdateGraph = async () => {
     try {
-      const body = { total: totalValue, profit_percentage: profitPercentage, total_profit: totalProfit, prev_profit: totalPrevProfit, avg_profit: totalAvgProfit, avg_profit_percent: totalAvgProfitPercentage}
+      const body = {
+        total: totalValue,
+        profit_percentage: profitPercentage,
+        total_profit: totalProfit,
+        prev_profit: totalPrevProfit,
+        avg_profit: totalAvgProfit,
+        avg_profit_percent: totalAvgProfitPercentage,
+      }
       const response = await Trading_TimeFinder.post('/time', body)
       fetchData()
     } catch (error) {
@@ -94,21 +101,27 @@ const Trading = () => {
       profitPercent = profitPercent + tradingTimeDatas[i].profit_percentage
     }
 
-    let profPercent = (((value - capital) / capital) * 100)
+    let profPercent = ((value - capital) / capital) * 100
 
-    if(tradingTimeDatas.length>1){
+    if (tradingTimeDatas.length != 0) {
       setTotalValue(value)
       setProfitPercentage(profPercent)
-      setTotalProfit(value-capital)
-      setTotalPrevProfit((value-capital)-(tradingTimeDatas[tradingTimeDatas.length-1].total_profit)) 
-      setTotalAvgProfit((value-capital)/(tradingTimeDatas.length+1))
-      setTotalAvgProfitPercentage((profitPercent + profPercent) / (tradingTimeDatas.length+1)) 
-    }else{
+      setTotalProfit(value - capital)
+      setTotalPrevProfit(
+        value -
+          capital -
+          tradingTimeDatas[tradingTimeDatas.length - 1].total_profit
+      )
+      setTotalAvgProfit((value - capital) / (tradingTimeDatas.length + 1))
+      setTotalAvgProfitPercentage(
+        (profitPercent + profPercent) / (tradingTimeDatas.length + 1)
+      )
+    } else {
       setTotalValue(value)
       setProfitPercentage(profPercent)
-      setTotalProfit(value-capital)
-      setTotalPrevProfit(value-capital) 
-      setTotalAvgProfit(value-capital)
+      setTotalProfit(value - capital)
+      setTotalPrevProfit(value - capital)
+      setTotalAvgProfit(value - capital)
       setTotalAvgProfitPercentage(profPercent)
     }
   }
@@ -119,7 +132,7 @@ const Trading = () => {
       if (response.data.data.networth.length !== 0) {
         // Filter and update datas state with only invest true data
         const filteredData: InvestData[] = response.data.data.networth.filter(
-          (data: InvestData) => data.type === "trading"
+          (data: InvestData) => data.type === 'trading'
         )
         setDatas(filteredData)
       }
@@ -129,17 +142,87 @@ const Trading = () => {
 
     try {
       const response = await Trading_TimeFinder.get('/time')
-      if (response.data.data.trading_time.length !== 0) {
+      if (response.data.data.trading_time.length > 1) {
         setTradingTimeDatas(response.data.data.trading_time)
 
-        setTotal(response.data.data.trading_time[response.data.data.trading_time.length-1].total)
-        setTotalIncrement((response.data.data.trading_time[response.data.data.trading_time.length-1].total)-(response.data.data.trading_time[response.data.data.trading_time.length-2].total))
-        setPrevProfit(response.data.data.trading_time[response.data.data.trading_time.length-1].prev_profit)
-        setPrevProfitIncrement((response.data.data.trading_time[response.data.data.trading_time.length-1].prev_profit)-(response.data.data.trading_time[response.data.data.trading_time.length-2].prev_profit))
-        setAvgProfit(response.data.data.trading_time[response.data.data.trading_time.length-1].avg_profit)
-        setAvgProfitIncrement((response.data.data.trading_time[response.data.data.trading_time.length-1].avg_profit)-(response.data.data.trading_time[response.data.data.trading_time.length-2].avg_profit))
-        setAvgProfitPercent(response.data.data.trading_time[response.data.data.trading_time.length-1].avg_profit_percent)
-        setAvgProfitPercentIncrement((response.data.data.trading_time[response.data.data.trading_time.length-1].avg_profit_percent)-(response.data.data.trading_time[response.data.data.trading_time.length-2].avg_profit_percent))
+        setTotal(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].total
+        )
+        setTotalIncrement(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].total -
+            response.data.data.trading_time[
+              response.data.data.trading_time.length - 2
+            ].total
+        )
+        setPrevProfit(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].prev_profit
+        )
+        setPrevProfitIncrement(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].prev_profit -
+            response.data.data.trading_time[
+              response.data.data.trading_time.length - 2
+            ].prev_profit
+        )
+        setAvgProfit(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].avg_profit
+        )
+        setAvgProfitIncrement(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].avg_profit -
+            response.data.data.trading_time[
+              response.data.data.trading_time.length - 2
+            ].avg_profit
+        )
+        setAvgProfitPercent(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].avg_profit_percent
+        )
+        setAvgProfitPercentIncrement(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].avg_profit_percent -
+            response.data.data.trading_time[
+              response.data.data.trading_time.length - 2
+            ].avg_profit_percent
+        )
+      } else {
+        setTradingTimeDatas(response.data.data.trading_time)
+
+        setTotal(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].total
+        )
+
+        setPrevProfit(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].prev_profit
+        )
+
+        setAvgProfit(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].avg_profit
+        )
+
+        setAvgProfitPercent(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].avg_profit_percent
+        )
       }
     } catch (error) {
       console.log(error)
@@ -153,6 +236,12 @@ const Trading = () => {
   useEffect(() => {
     calc()
   }, [tradingTimeDatas])
+
+  useEffect(() => {
+    if (tradingTimeDatas.length == 0) {
+      calc()
+    }
+  }, [datas])
 
   return (
     <>
@@ -170,7 +259,15 @@ const Trading = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 ${total}
               </strong>
-              {totalIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalIncrement}</span>}
+              {totalIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalIncrement}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalIncrement}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -179,12 +276,22 @@ const Trading = () => {
             <CreditCardIcon className='text-2xl text-white' />
           </div>
           <div className='pl-4'>
-            <span className='text-sm text-gray-500 font-light'>Previous Profit</span>
+            <span className='text-sm text-gray-500 font-light'>
+              Previous Profit
+            </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
                 ${prevProfit}
               </strong>
-              {prevProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{prevProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{prevProfitIncrement}</span>}
+              {prevProfitIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{prevProfitIncrement}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {prevProfitIncrement}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -200,7 +307,15 @@ const Trading = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 ${avgProfit.toFixed(2)}
               </strong>
-              {avgProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{avgProfitIncrement.toFixed(2)}</span> : <span className='text-sm text-red-500 pl-2'>{avgProfitIncrement.toFixed(2)}</span>}
+              {avgProfitIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{avgProfitIncrement.toFixed(2)}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {avgProfitIncrement.toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -209,37 +324,47 @@ const Trading = () => {
             <ChevronDoubleDownIcon className='text-2xl text-white' />
           </div>
           <div className='pl-4'>
-            <span className='text-sm text-gray-500 font-light'>Average Profit (%)</span>
+            <span className='text-sm text-gray-500 font-light'>
+              Average Profit (%)
+            </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                {(avgProfitPercent).toFixed(2)}
+                {avgProfitPercent.toFixed(2)}
               </strong>
-              {avgProfitPercentIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{avgProfitPercentIncrement.toFixed(2)}</span> : <span className='text-sm text-red-500 pl-2'>{avgProfitPercentIncrement.toFixed(2)}</span>}
+              {avgProfitPercentIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{avgProfitPercentIncrement.toFixed(2)}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {avgProfitPercentIncrement.toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
       </div>
-      
+
       <div className='h-[35rem] mt-3 overflow-auto p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
-      <ResponsiveContainer width='100%' height='100%'>
-        <LineChart
-          width={1000}
-          height={550}
-          data={processedData}
-          margin={{ top: 20, right: 5, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray='3 3' />
-          <XAxis dataKey='date'>
+        <ResponsiveContainer width='100%' height='100%'>
+          <LineChart
+            width={1000}
+            height={550}
+            data={processedData}
+            margin={{ top: 20, right: 5, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray='3 3' />
+            <XAxis dataKey='date'>
               <Label
                 value='Profit vs Time'
                 position='insideTop'
                 offset={-497}
               />
             </XAxis>
-          <YAxis />
-          <Tooltip />
-          <Line type='monotone' dataKey='value' stroke='#82ca9d' />
-        </LineChart>
-      </ResponsiveContainer>
+            <YAxis />
+            <Tooltip />
+            <Line type='monotone' dataKey='value' stroke='#82ca9d' />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     </>
   )
