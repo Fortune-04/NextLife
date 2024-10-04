@@ -3,6 +3,19 @@ import { useState, useEffect } from 'react'
 //API finder
 import NetworthFinder from '../Apis/NetworthFinder'
 
+// Ensure only one of these exists
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction
+} from '@/components/ui/alert-dialog';
+
 //Import icon
 import { PlusIcon } from '@heroicons/react/24/solid'
 
@@ -28,6 +41,9 @@ const Networth: React.FC = () => {
     base_value: 0,
     type: 'Select',
   })
+// State for delete dialog
+const [openDialog, setOpenDialog] = useState(false)
+const [selectedItemId, setSelectedItemId] = useState<number | null>(null)
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -85,42 +101,103 @@ const Networth: React.FC = () => {
     setIsUpdateOpen(false)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault()
+  //   try {
+  //     const body = {
+  //       name: formData.name,
+  //       value: formData.value,
+  //       base_value: formData.base_value,
+  //       type: formData.type,
+  //     }
+  //     console.log(body)
+  //     const response = await NetworthFinder.post('/', body)
+  //     fetchData()
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  //   closeModal() // Close the modal after form submission
+  // }
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const newErrors: Record<string, string> = {};
+    // Validation logic
+    
+    if (!formData.name) newErrors.name = 'Name is required';
+    if (!formData.value) newErrors.value = 'Value is required';
+    if (!formData.base_value) newErrors.base_value = 'Base value is required';
+
+    if(formData.value<=0)newErrors.value='value must be greater than 0';
+    if (formData.base_value <= 0) newErrors.base_value = 'Base value must be greater than 0';
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     try {
       const body = {
         name: formData.name,
         value: formData.value,
         base_value: formData.base_value,
         type: formData.type,
-      }
-      console.log(body)
-      const response = await NetworthFinder.post('/', body)
-      fetchData()
+      };
+      console.log(body);
+      await NetworthFinder.post('/', body);
+      fetchData();
+      closeModal(); // Close the modal after form submission
     } catch (error) {
-      console.log(error)
+      console.error(error);
     }
-    closeModal() // Close the modal after form submission
+  };
+  const openDeleteDialog = (id: number) => {
+    setSelectedItemId(id)
+    setOpenDialog(true)
   }
-
-  const handleDelete = async (id: number) => {
-    try {
-      const response = await NetworthFinder.delete(`/${id}`)
-      setDatas(
-        datas.filter((data) => {
-          return data.id !== id
-        })
-      )
-      console.log(response)
-      // setOpenDelModal(false);
-      // setOpenSnackDel(true);
-    } catch (err) {
-      console.log(err)
+  const handleDelete = async () => {
+    if (selectedItemId !== null) {
+      try {
+        const response = await NetworthFinder.delete(`/${selectedItemId}`)
+        setDatas(datas.filter((data) => data.id !== selectedItemId))
+        console.log(response)
+        setOpenDialog(false) // Close the dialog after successful deletion
+      } catch (err) {
+        console.log(err)
+      }
     }
   }
+  // const handleDelete = async (id: number) => {
+  //   try {
+  //     const response = await NetworthFinder.delete(`/${id}`)
+  //     setDatas(
+  //       datas.filter((data) => {
+  //         return data.id !== id
+  //       })
+  //     )
+  //     console.log(response)
+  //     // setOpenDelModal(false);
+  //     // setOpenSnackDel(true);
+  //   } catch (err) {
+  //     console.log(err)
+  //   }
+  // }
 
   const handleUpdate = async (e) => {
     e.preventDefault()
+    const newErrors: Record<string, string> = {};
+    // Validation logic
+    
+    if (!formData.name) newErrors.name = 'Name is required';
+    if (!formData.value) newErrors.value = 'Value is required';
+    if (!formData.base_value) newErrors.base_value = 'Base value is required';
+
+    if(formData.value<=0)newErrors.value='value must be greater than 0';
+    if (formData.base_value <= 0) newErrors.base_value = 'Base value must be greater than 0';
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
     try {
       const body = {
         id: formData.id,
@@ -188,11 +265,32 @@ const Networth: React.FC = () => {
                     }>
                     Edit
                   </button>
-                  <button
-                    className='flex-1 bg-red-500 text-white px-4 py-2 border border-gray-200'
-                    onClick={() => handleDelete(data.id)}>
-                    Delete
-                  </button>
+                 {/* Delete Button with AlertDialog */}
+      <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
+        <AlertDialogTrigger asChild>
+          <button
+            className="flex-1 bg-red-500 text-white px-4 py-2 border border-gray-200"
+            onClick={() => openDeleteDialog(data.id)}>
+            Delete
+          </button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this item.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setOpenDialog(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
                 </div>
               </div>
             </div>
@@ -257,7 +355,7 @@ const Networth: React.FC = () => {
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-
+                  {errors.name && <p className="text-red-500">{errors.name}</p>}
                   <label htmlFor='value'>Value:</label>
                   <input
                     type='number'
@@ -267,7 +365,7 @@ const Networth: React.FC = () => {
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-
+                  {errors.value && <p className="text-red-500">{errors.value}</p>}
                   <label htmlFor='target_value'>Target value:</label>
                   <input
                     type='number'
@@ -277,7 +375,7 @@ const Networth: React.FC = () => {
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-
+                  {errors.base_value && <p className="text-red-500">{errors.base_value}</p>}
                   <label htmlFor='type'>Type</label>
                   <select
                     id='type'
@@ -362,7 +460,7 @@ const Networth: React.FC = () => {
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-
+                   {errors.name && <p className='text-red-500'>{errors.name}</p>}
                   <label htmlFor='value'>Value:</label>
                   <input
                     type='number'
@@ -372,7 +470,7 @@ const Networth: React.FC = () => {
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-
+                  {errors.base_value && <p className='text-red-500'>{errors.base_value}</p>}
                   <label htmlFor='target_value'>Target value:</label>
                   <input
                     type='number'
@@ -382,6 +480,7 @@ const Networth: React.FC = () => {
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
+                   {errors.base_value && <p className='text-red-500'>{errors.base_value}</p>}
 
                   <label htmlFor='type'>Type</label>
                   <select
