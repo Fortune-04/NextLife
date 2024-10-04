@@ -14,7 +14,7 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction
-} from '@/components/ui/alert-dialog';
+} from '@/Components/ui/alert-dialog';
 
 //Import icon
 import { PlusIcon } from '@heroicons/react/24/solid'
@@ -361,16 +361,17 @@ const [selectedItemId, setSelectedItemId] = useState<number | null>(null)
                     type='number'
                     id='value'
                     name='value'
+                    min={0}
                     value={formData.value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-                  {errors.value && <p className="text-red-500">{errors.value}</p>}
                   <label htmlFor='target_value'>Target value:</label>
                   <input
                     type='number'
                     id='base_value'
                     name='base_value'
+                    min={0}
                     value={formData.base_value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
@@ -466,16 +467,18 @@ const [selectedItemId, setSelectedItemId] = useState<number | null>(null)
                     type='number'
                     id='value'
                     name='value'
+                    min={0}
                     value={formData.value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-                  {errors.base_value && <p className='text-red-500'>{errors.base_value}</p>}
+                  
                   <label htmlFor='target_value'>Target value:</label>
                   <input
                     type='number'
                     id='base_value'
                     name='base_value'
+                    min={0}
                     value={formData.base_value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'

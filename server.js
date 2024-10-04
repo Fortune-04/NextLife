@@ -78,10 +78,10 @@ app.put("/networth", async (req, res) => {
   try {
     const { name, value, base_value, type } = req.body;
 
-    if (name == null || value == null || base_value == null || type == null) {
+    if (name == null || type == null) {
       return res.status(400).json({
         status: "error",
-        message: "Name, value, base value, and type are required fields.",
+        message: "Name and type are required fields.",
       });
     }
     if (value <= 0 || base_value <= 0) {
