@@ -4,6 +4,9 @@ import { useNavigate, useLocation, Outlet } from 'react-router-dom'
 const Layout = () => {
   const history = useNavigate()
   const location = useLocation()
+  const isNetworth = location.pathname === '/networth'
+  const isGoal = location.pathname === '/goal'
+  const isSkill = location.pathname === '/skill'
 
   const [open, setOpen] = useState(true)
   const Menus = [
@@ -56,15 +59,14 @@ const Layout = () => {
               <span className={`${!open && 'hidden'} origin-left duration-200`}>
                 {Menu.title}
               </span>
-              {/* <div className='w-full'>
-                <hr className='border-t border-gray-300' />
-              </div> */}
             </li>
           ))}
         </ul>
       </div>
-      <div className='h-screen flex-1 p-7'>
-        {/* <h1 className="text-2xl font-semibold ">Home Page</h1> */}
+      <div
+        className={`h-screen flex-1 p-7 ${
+          isNetworth || isGoal || isSkill ? 'overflow-auto' : ''
+        }`}>
         <Outlet />
       </div>
     </div>
