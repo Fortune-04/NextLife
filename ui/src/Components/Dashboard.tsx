@@ -44,11 +44,14 @@ const Dashboard = () => {
   const [preNetworth, setPreNetworth] = useState(0)
   const [datas, setDatas] = useState<Data[]>([])
   const [totalTradingProfit, setTotalTradingProfit] = useState(0)
-  const [totalTradingProfitIncrement, setTotalTradingProfitIncrement] = useState(0)
+  const [totalTradingProfitIncrement, setTotalTradingProfitIncrement] =
+    useState(0)
   const [totalInvestProfit, setTotalInvestProfit] = useState(0)
-  const [totalInvestProfitIncrement, setTotalInvestProfitIncrement] = useState(0)
+  const [totalInvestProfitIncrement, setTotalInvestProfitIncrement] =
+    useState(0)
   const [totalBusinessProfit, setTotalBusinessProfit] = useState(0)
-  const [totalBusinessProfitIncrement, setTotalBusinessProfitIncrement] = useState(0)
+  const [totalBusinessProfitIncrement, setTotalBusinessProfitIncrement] =
+    useState(0)
 
   const handleUpdate = async () => {
     let monthly_income = total_networth - preNetworth
@@ -79,8 +82,19 @@ const Dashboard = () => {
     try {
       const response = await Investment_TimeFinder.get('/time')
       if (response.data.data.investment_time.length !== 0) {
-        setTotalInvestProfit(response.data.data.investment_time[response.data.data.investment_time.length-1].investment_profit)
-        setTotalInvestProfitIncrement((response.data.data.investment_time[response.data.data.investment_time.length-1].investment_profit)-(response.data.data.investment_time[response.data.data.investment_time.length-2].investment_profit))
+        setTotalInvestProfit(
+          response.data.data.investment_time[
+            response.data.data.investment_time.length - 1
+          ].investment_profit
+        )
+        setTotalInvestProfitIncrement(
+          response.data.data.investment_time[
+            response.data.data.investment_time.length - 1
+          ].investment_profit -
+            response.data.data.investment_time[
+              response.data.data.investment_time.length - 2
+            ].investment_profit
+        )
       }
     } catch (error) {
       console.log(error)
@@ -89,8 +103,19 @@ const Dashboard = () => {
     try {
       const response = await Trading_TimeFinder.get('/time')
       if (response.data.data.trading_time.length !== 0) {
-        setTotalTradingProfit(response.data.data.trading_time[response.data.data.trading_time.length-1].total_profit)
-        setTotalTradingProfitIncrement((response.data.data.trading_time[response.data.data.trading_time.length-1].total_profit)-(response.data.data.trading_time[response.data.data.trading_time.length-2].total_profit))
+        setTotalTradingProfit(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].total_profit
+        )
+        setTotalTradingProfitIncrement(
+          response.data.data.trading_time[
+            response.data.data.trading_time.length - 1
+          ].total_profit -
+            response.data.data.trading_time[
+              response.data.data.trading_time.length - 2
+            ].total_profit
+        )
       }
     } catch (error) {
       console.log(error)
@@ -99,8 +124,19 @@ const Dashboard = () => {
     try {
       const response = await Business_TimeFinder.get('/')
       if (response.data.data.business_time.length !== 0) {
-        setTotalBusinessProfit(response.data.data.business_time[response.data.data.business_time.length-1].business_profit)
-        setTotalBusinessProfitIncrement((response.data.data.business_time[response.data.data.business_time.length-1].business_profit)-(response.data.data.business_time[response.data.data.business_time.length-2].business_profit))
+        setTotalBusinessProfit(
+          response.data.data.business_time[
+            response.data.data.business_time.length - 1
+          ].business_profit
+        )
+        setTotalBusinessProfitIncrement(
+          response.data.data.business_time[
+            response.data.data.business_time.length - 1
+          ].business_profit -
+            response.data.data.business_time[
+              response.data.data.business_time.length - 2
+            ].business_profit
+        )
       }
     } catch (error) {
       console.log(error)
@@ -170,7 +206,15 @@ const Dashboard = () => {
                 ${totalInvestProfit}
                 {/* $<InvestmentProfit type='profit' /> */}
               </strong>
-              {totalInvestProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalInvestProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalInvestProfitIncrement}</span>}
+              {totalInvestProfitIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalInvestProfitIncrement}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalInvestProfitIncrement}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -184,9 +228,17 @@ const Dashboard = () => {
             </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-              ${totalTradingProfit}
+                ${totalTradingProfit}
               </strong>
-              {totalTradingProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalTradingProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalTradingProfitIncrement}</span>}
+              {totalTradingProfitIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalTradingProfitIncrement}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalTradingProfitIncrement}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -200,10 +252,18 @@ const Dashboard = () => {
             </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                ${totalBusinessProfit}
+                ${totalBusinessProfit.toFixed(2)}
                 {/* $<BusinessProfit type='profit' /> */}
               </strong>
-              {totalBusinessProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalBusinessProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalBusinessProfitIncrement}</span>}
+              {totalBusinessProfitIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalBusinessProfitIncrement.toFixed(2)}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalBusinessProfitIncrement.toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
