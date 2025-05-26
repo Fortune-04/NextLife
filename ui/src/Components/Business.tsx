@@ -44,7 +44,9 @@ interface BusinessTimeData {
 
 const Business = () => {
   const [datas, setDatas] = useState<any[]>([])
-  const [businessTimeDatas, setBusinessTimeDatas] = useState<BusinessTimeData[]>([])
+  const [businessTimeDatas, setBusinessTimeDatas] = useState<
+    BusinessTimeData[]
+  >([])
 
   //to insert into the database
   const [revenue, setRevenue] = useState(0)
@@ -60,12 +62,17 @@ const Business = () => {
   const [totalProfit, setTotalProfit] = useState(0)
   const [totalProfitIncrement, setTotalProfitIncrement] = useState(0)
   const [totalProfitPercentage, setTotalProfitPercentage] = useState(0)
-  const [totalProfitPercentageIncrement, setTotalProfitPercentageIncrement] = useState(0)
-  
+  const [totalProfitPercentageIncrement, setTotalProfitPercentageIncrement] =
+    useState(0)
 
   const handleUpdateGraph = async () => {
     try {
-      const body = { business_profit: profit, total_revenue: revenue, total_capital: capitals, profit_percentage: profitPercentage }
+      const body = {
+        business_profit: profit,
+        total_revenue: revenue,
+        total_capital: capitals,
+        profit_percentage: profitPercentage,
+      }
       const response = await Business_TimeFinder.post('/', body)
       fetchData()
     } catch (error) {
@@ -148,14 +155,58 @@ const Business = () => {
       console.log(response.data.data.business_time)
       if (response.data.data.business_time.length !== 0) {
         setBusinessTimeDatas(response.data.data.business_time)
-        setTotalRevenue(response.data.data.business_time[response.data.data.business_time.length-1].total_revenue)
-        setTotalRevenueIncrement((response.data.data.business_time[response.data.data.business_time.length-1].total_revenue)-(response.data.data.business_time[response.data.data.business_time.length-2].total_revenue))
-        setTotalCapital(response.data.data.business_time[response.data.data.business_time.length-1].total_capital)
-        setTotalCapitalIncrement((response.data.data.business_time[response.data.data.business_time.length-1].total_capital)-(response.data.data.business_time[response.data.data.business_time.length-2].total_capital))
-        setTotalProfit(response.data.data.business_time[response.data.data.business_time.length-1].business_profit)
-        setTotalProfitIncrement((response.data.data.business_time[response.data.data.business_time.length-1].business_profit)-(response.data.data.business_time[response.data.data.business_time.length-2].business_profit))
-        setTotalProfitPercentage(response.data.data.business_time[response.data.data.business_time.length-1].profit_percentage)
-        setTotalProfitPercentageIncrement((response.data.data.business_time[response.data.data.business_time.length-1].profit_percentage)-(response.data.data.business_time[response.data.data.business_time.length-2].profit_percentage))
+        setTotalRevenue(
+          response.data.data.business_time[
+            response.data.data.business_time.length - 1
+          ].total_revenue
+        )
+        setTotalRevenueIncrement(
+          response.data.data.business_time[
+            response.data.data.business_time.length - 1
+          ].total_revenue -
+            response.data.data.business_time[
+              response.data.data.business_time.length - 2
+            ].total_revenue
+        )
+        setTotalCapital(
+          response.data.data.business_time[
+            response.data.data.business_time.length - 1
+          ].total_capital
+        )
+        setTotalCapitalIncrement(
+          response.data.data.business_time[
+            response.data.data.business_time.length - 1
+          ].total_capital -
+            response.data.data.business_time[
+              response.data.data.business_time.length - 2
+            ].total_capital
+        )
+        setTotalProfit(
+          response.data.data.business_time[
+            response.data.data.business_time.length - 1
+          ].business_profit
+        )
+        setTotalProfitIncrement(
+          response.data.data.business_time[
+            response.data.data.business_time.length - 1
+          ].business_profit -
+            response.data.data.business_time[
+              response.data.data.business_time.length - 2
+            ].business_profit
+        )
+        setTotalProfitPercentage(
+          response.data.data.business_time[
+            response.data.data.business_time.length - 1
+          ].profit_percentage
+        )
+        setTotalProfitPercentageIncrement(
+          response.data.data.business_time[
+            response.data.data.business_time.length - 1
+          ].profit_percentage -
+            response.data.data.business_time[
+              response.data.data.business_time.length - 2
+            ].profit_percentage
+        )
       }
     } catch (error) {
       console.log(error)
@@ -184,9 +235,17 @@ const Business = () => {
             <span className='text-sm text-gray-500 font-light'>Revenue</span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                ${totalRevenue}
+                ${totalRevenue.toFixed(2)}
               </strong>
-              {totalRevenueIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalRevenueIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalRevenueIncrement}</span>}
+              {totalRevenueIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalRevenueIncrement.toFixed(2)}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalRevenueIncrement.toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -198,9 +257,17 @@ const Business = () => {
             <span className='text-sm text-gray-500 font-light'>Capital</span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                ${totalCapital}
+                ${totalCapital.toFixed(2)}
               </strong>
-              {totalCapitalIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalCapitalIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalCapitalIncrement}</span>}
+              {totalCapitalIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalCapitalIncrement.toFixed(2)}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalCapitalIncrement.toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -214,9 +281,17 @@ const Business = () => {
             </span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                ${totalProfit}
+                ${totalProfit.toFixed(2)}
               </strong>
-              {totalProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalProfitIncrement}</span>}
+              {totalProfitIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalProfitIncrement.toFixed(2)}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalProfitIncrement.toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -230,24 +305,30 @@ const Business = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 {totalProfitPercentage.toFixed(2)}
               </strong>
-              {totalProfitPercentageIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalProfitPercentageIncrement.toFixed(2)}</span> : <span className='text-sm text-red-500 pl-2'>{totalProfitPercentageIncrement.toFixed(2)}</span>}
+              {totalProfitPercentageIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalProfitPercentageIncrement.toFixed(2)}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalProfitPercentageIncrement.toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
       </div>
 
       <div className='h-[35rem] mt-3 p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
-      <Carousel className='w-full'>
-        <CarouselContent>
-          {page.map((content, index) => (
-            <CarouselItem key={index}>
-                {content}
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className='carousel-button previous'/>
-        <CarouselNext className='carousel-button next' />
-      </Carousel>
+        <Carousel className='w-full'>
+          <CarouselContent>
+            {page.map((content, index) => (
+              <CarouselItem key={index}>{content}</CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className='carousel-button previous' />
+          <CarouselNext className='carousel-button next' />
+        </Carousel>
       </div>
     </>
   )
