@@ -174,7 +174,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className='flex gap-4'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
         <BoxWrapper>
           <button className='rounded-full h-12 w-12 flex items-center justify-center bg-sky-500'>
             <CurrencyDollarIcon
@@ -269,27 +269,24 @@ const Dashboard = () => {
         </BoxWrapper>
       </div>
 
-      <div className='h-[35rem] mt-3 bg-white p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
+      {/* <div className='flex flex-col flex-1'> */}
+      <div className='h-[38rem] overflow-auto mt-3 p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
+        <h2 className='text-lg font-semibold text-gray-700 mb-4 text-center'>
+          Networth vs Time
+        </h2>
         <ResponsiveContainer width='100%' height='100%'>
           <LineChart
-            width={1000}
-            height={550}
             data={processedData}
-            margin={{ top: 20, right: 5, left: 0, bottom: 5 }}>
+            margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
             <CartesianGrid strokeDasharray='3 3' />
-            <XAxis dataKey='date'>
-              <Label
-                value='Networth vs Time'
-                position='insideTop'
-                offset={-499}
-              />
-            </XAxis>
+            <XAxis dataKey='date' />
             <YAxis />
             <Tooltip />
             <Line type='monotone' dataKey='value' stroke='#8884d8' />
           </LineChart>
         </ResponsiveContainer>
       </div>
+      {/* </div> */}
     </>
   )
 }

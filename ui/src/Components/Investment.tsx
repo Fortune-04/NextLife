@@ -69,11 +69,17 @@ const Investment = () => {
   const [totalProfit, setTotalProfit] = useState(0)
   const [totalProfitIncrement, setTotalProfitIncrement] = useState(0)
   const [totalProfitPercentage, setTotalProfitPercentage] = useState(0)
-  const [totalProfitPercentageIncrement, setTotalProfitPercentageIncrement] = useState(0)
+  const [totalProfitPercentageIncrement, setTotalProfitPercentageIncrement] =
+    useState(0)
 
   const handleUpdateGraph = async () => {
     try {
-      const body = { investment_profit: profit, total: total, capital: capital, profit_percentage:  profitPercentage}
+      const body = {
+        investment_profit: profit,
+        total: total,
+        capital: capital,
+        profit_percentage: profitPercentage,
+      }
       const response = await Investment_TimeFinder.post('/time', body)
       fetchData()
     } catch (error) {
@@ -89,30 +95,20 @@ const Investment = () => {
 
   const page = [
     <div key='1' style={{ width: '100%', height: '550px' }}>
+      <h2 className='text-lg font-semibold text-gray-700 mb-4 text-center'>
+        Profit vs Time
+      </h2>
       <ResponsiveContainer width='100%' height='100%'>
         <LineChart
           data={processedData}
-          margin={{ top: 20, right: 15, left: 0, bottom: 20 }}>
+          margin={{ top: 20, right: 20, left: 20, bottom: 35 }}>
           <CartesianGrid strokeDasharray='3 3' />
-          <XAxis dataKey='date'>
-              <Label
-                value='Profit vs Time'
-                position='insideTop'
-                offset={-500}
-              />
-            </XAxis>
+          <XAxis dataKey='date' />
           <YAxis />
           <Tooltip />
-          {/* <Line
-            type='monotone'
-            dataKey='pv'
-            stroke='#8884d8'
-            activeDot={{ r: 8 }}
-          /> */}
-          <Line type='monotone' dataKey='value' stroke='#82ca9d' />
+          <Line type='monotone' dataKey='value' stroke='#8884d8' />
         </LineChart>
       </ResponsiveContainer>
-      <div></div>
     </div>,
     <div key='2'>
       <DataTable columns={columns} data={datas} />
@@ -131,7 +127,7 @@ const Investment = () => {
     setTotal(value)
     setCapital(capital)
     setProfit(value - capital)
-    setProfitPercentage((((value - capital) / capital) * 100))
+    setProfitPercentage(((value - capital) / capital) * 100)
   }
 
   const fetchData = async () => {
@@ -140,7 +136,7 @@ const Investment = () => {
       if (response.data.data.networth.length !== 0) {
         // Filter and update datas state with only invest true data
         const filteredData: InvestData[] = response.data.data.networth.filter(
-          (data: InvestData) => data.type === "invest"
+          (data: InvestData) => data.type === 'invest'
         )
         const updatedData: InvestData[] = filteredData.map(
           (data: InvestData) => ({
@@ -165,14 +161,58 @@ const Investment = () => {
       console.log(response.data.data.investment_time)
       if (response.data.data.investment_time.length !== 0) {
         setInvestTimeDatas(response.data.data.investment_time)
-        setTotalValue(response.data.data.investment_time[response.data.data.investment_time.length-1].total)
-        setTotalValueIncrement((response.data.data.investment_time[response.data.data.investment_time.length-1].total)-(response.data.data.investment_time[response.data.data.investment_time.length-2].total))
-        setTotalCapital(response.data.data.investment_time[response.data.data.investment_time.length-1].capital)
-        setTotalCapitalIncrement((response.data.data.investment_time[response.data.data.investment_time.length-1].capital)-(response.data.data.investment_time[response.data.data.investment_time.length-2].capital))
-        setTotalProfit(response.data.data.investment_time[response.data.data.investment_time.length-1].investment_profit)
-        setTotalProfitIncrement((response.data.data.investment_time[response.data.data.investment_time.length-1].investment_profit)-(response.data.data.investment_time[response.data.data.investment_time.length-2].investment_profit))
-        setTotalProfitPercentage(response.data.data.investment_time[response.data.data.investment_time.length-1].profit_percentage)
-        setTotalProfitPercentageIncrement((response.data.data.investment_time[response.data.data.investment_time.length-1].profit_percentage)-(response.data.data.investment_time[response.data.data.investment_time.length-2].profit_percentage))
+        setTotalValue(
+          response.data.data.investment_time[
+            response.data.data.investment_time.length - 1
+          ].total
+        )
+        setTotalValueIncrement(
+          response.data.data.investment_time[
+            response.data.data.investment_time.length - 1
+          ].total -
+            response.data.data.investment_time[
+              response.data.data.investment_time.length - 2
+            ].total
+        )
+        setTotalCapital(
+          response.data.data.investment_time[
+            response.data.data.investment_time.length - 1
+          ].capital
+        )
+        setTotalCapitalIncrement(
+          response.data.data.investment_time[
+            response.data.data.investment_time.length - 1
+          ].capital -
+            response.data.data.investment_time[
+              response.data.data.investment_time.length - 2
+            ].capital
+        )
+        setTotalProfit(
+          response.data.data.investment_time[
+            response.data.data.investment_time.length - 1
+          ].investment_profit
+        )
+        setTotalProfitIncrement(
+          response.data.data.investment_time[
+            response.data.data.investment_time.length - 1
+          ].investment_profit -
+            response.data.data.investment_time[
+              response.data.data.investment_time.length - 2
+            ].investment_profit
+        )
+        setTotalProfitPercentage(
+          response.data.data.investment_time[
+            response.data.data.investment_time.length - 1
+          ].profit_percentage
+        )
+        setTotalProfitPercentageIncrement(
+          response.data.data.investment_time[
+            response.data.data.investment_time.length - 1
+          ].profit_percentage -
+            response.data.data.investment_time[
+              response.data.data.investment_time.length - 2
+            ].profit_percentage
+        )
       }
     } catch (error) {
       console.log(error)
@@ -203,7 +243,15 @@ const Investment = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 ${totalValue}
               </strong>
-              {totalValueIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalValueIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalValueIncrement}</span>}
+              {totalValueIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalValueIncrement}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalValueIncrement}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -217,7 +265,15 @@ const Investment = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 ${totalCapital}
               </strong>
-              {totalCapitalIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalCapitalIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalCapitalIncrement}</span>}
+              {totalCapitalIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalCapitalIncrement}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalCapitalIncrement}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -233,7 +289,15 @@ const Investment = () => {
               <strong className='text-xl text-gray-700 font-semibold'>
                 ${totalProfit}
               </strong>
-              {totalProfitIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalProfitIncrement}</span> : <span className='text-sm text-red-500 pl-2'>{totalProfitIncrement}</span>}
+              {totalProfitIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalProfitIncrement}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalProfitIncrement}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -245,9 +309,17 @@ const Investment = () => {
             <span className='text-sm text-gray-500 font-light'>Profit (%)</span>
             <div className='flex items-center'>
               <strong className='text-xl text-gray-700 font-semibold'>
-                {(totalProfitPercentage).toFixed(2)}
+                {totalProfitPercentage.toFixed(2)}
               </strong>
-              {totalProfitPercentageIncrement > 0 ? <span className='text-sm text-green-500 pl-2'>+{totalProfitPercentageIncrement.toFixed(2)}</span> : <span className='text-sm text-red-500 pl-2'>{totalProfitPercentageIncrement.toFixed(2)}</span>}
+              {totalProfitPercentageIncrement > 0 ? (
+                <span className='text-sm text-green-500 pl-2'>
+                  +{totalProfitPercentageIncrement.toFixed(2)}
+                </span>
+              ) : (
+                <span className='text-sm text-red-500 pl-2'>
+                  {totalProfitPercentageIncrement.toFixed(2)}
+                </span>
+              )}
             </div>
           </div>
         </BoxWrapper>
@@ -288,28 +360,27 @@ const Investment = () => {
         </Table>
       </div> */}
 
-    <div className='h-[35rem] mt-3 p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
-    {/* <div className='h-[35rem] mt-3 bg-white p-3 rounded-sm border border-gray-200 flex flex-col flex-1'> */}
-      {/* <Carousel className='w-full max-w-xs'> */}
-      <Carousel className='w-full'>
-        <CarouselContent>
-          {page.map((content, index) => (
-            <CarouselItem key={index}>
-              {/* <div className='h-[34rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'> */}
+      <div className='h-[38rem] mt-3 p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
+        {/* <div className='h-[35rem] mt-3 bg-white p-3 rounded-sm border border-gray-200 flex flex-col flex-1'> */}
+        {/* <Carousel className='w-full max-w-xs'> */}
+        <Carousel className='w-full'>
+          <CarouselContent>
+            {page.map((content, index) => (
+              <CarouselItem key={index}>
+                {/* <div className='h-[34rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'> */}
                 {content}
-              {/* </div> */}
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious className='carousel-button previous'/>
-        <CarouselNext className='carousel-button next' />
-      </Carousel>
+                {/* </div> */}
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className='carousel-button previous' />
+          <CarouselNext className='carousel-button next' />
+        </Carousel>
       </div>
       {/* <div className='h-[35rem] mt-3 overflow-auto p-2 rounded-sm border border-gray-200 flex flex-col flex-1'>
         <DataTable columns={columns} data={datas} />
       </div> */}
     </>
-    
   )
 }
 
