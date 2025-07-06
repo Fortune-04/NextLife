@@ -270,7 +270,7 @@ const Dashboard = () => {
       </div>
 
       {/* <div className='flex flex-col flex-1'> */}
-      <div className='h-[30rem] sm:h-[25rem] mt-3 bg-white p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
+      <div className='h-[38rem] overflow-auto mt-3 p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
         <h2 className='text-lg font-semibold text-gray-700 mb-4 text-center'>
           Networth vs Time
         </h2>

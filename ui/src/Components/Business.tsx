@@ -90,18 +90,15 @@ const Business = () => {
 
   const page = [
     <div key='1' style={{ width: '100%', height: '550px' }}>
+      <h2 className='text-lg font-semibold text-gray-700 mb-4 text-center'>
+        Revenue/Capital vs Time
+      </h2>
       <ResponsiveContainer width='100%' height='100%'>
         <LineChart
           data={processedData}
-          margin={{ top: 20, right: 15, left: 0, bottom: 20 }}>
+          margin={{ top: 20, right: 20, left: 20, bottom: 35 }}>
           <CartesianGrid strokeDasharray='3 3' />
-          <XAxis dataKey='date'>
-            <Label
-              value='Revenue/Capital vs Time'
-              position='insideTop'
-              offset={-500}
-            />
-          </XAxis>
+          <XAxis dataKey='date' />
           <YAxis />
           <Tooltip />
           <Line
@@ -319,7 +316,7 @@ const Business = () => {
         </BoxWrapper>
       </div>
 
-      <div className='h-[35rem] mt-3 p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
+      <div className='h-[38rem] mt-3 p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
         <Carousel className='w-full'>
           <CarouselContent>
             {page.map((content, index) => (

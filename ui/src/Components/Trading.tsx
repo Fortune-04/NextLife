@@ -345,24 +345,19 @@ const Trading = () => {
         </BoxWrapper>
       </div>
 
-      <div className='h-[35rem] mt-3 overflow-auto p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
+      <div className='h-[38rem] mt-3 overflow-auto p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
+        <h2 className='text-lg font-semibold text-gray-700 mb-4 text-center'>
+          Profit vs Time
+        </h2>
         <ResponsiveContainer width='100%' height='100%'>
           <LineChart
-            width={1000}
-            height={550}
             data={processedData}
-            margin={{ top: 20, right: 5, left: 0, bottom: 5 }}>
+            margin={{ top: 20, right: 20, left: 20, bottom: 35 }}>
             <CartesianGrid strokeDasharray='3 3' />
-            <XAxis dataKey='date'>
-              <Label
-                value='Profit vs Time'
-                position='insideTop'
-                offset={-497}
-              />
-            </XAxis>
+            <XAxis dataKey='date' />
             <YAxis />
             <Tooltip />
-            <Line type='monotone' dataKey='value' stroke='#82ca9d' />
+            <Line type='monotone' dataKey='value' stroke='#8884d8' />
           </LineChart>
         </ResponsiveContainer>
       </div>
