@@ -1,4 +1,16 @@
 import { useState, useEffect } from 'react'
+import CustomAlert from '../Components/ui/custom-alert'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../Components/ui/alert-dialog"
 
 //API finder
 import NetworthFinder from '../Apis/NetworthFinder'
@@ -21,6 +33,8 @@ const Networth: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
   //FormData
+  const [alertMessage, setAlertMessage] = useState<string>('');
+  const [showAlert, setShowAlert] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({
     id: 0,
     name: '',
@@ -28,7 +42,7 @@ const Networth: React.FC = () => {
     base_value: 0,
     type: 'Select',
   })
-
+  const [deleteId, setDeleteId] = useState<number | null>(null)
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -87,6 +101,17 @@ const Networth: React.FC = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if(!formData.name){
+      setAlertMessage('Name Cannot Be Empty');
+      setShowAlert(true);
+      return
+    }
+    if(formData.value<0 || formData.base_value<0){
+      setAlertMessage('Value Cannot Be Less Than 0');
+      setShowAlert(true);
+      return
+    }
+    
     try {
       const body = {
         name: formData.name,
@@ -117,10 +142,21 @@ const Networth: React.FC = () => {
     } catch (err) {
       console.log(err)
     }
+    setDeleteId(null) 
   }
 
   const handleUpdate = async (e) => {
     e.preventDefault()
+    if(!formData.name){
+      setAlertMessage('Name Cannot Be Empty');
+      setShowAlert(true);
+      return
+    }
+    if(formData.value<0 || formData.base_value<0){
+      setAlertMessage('Value Cannot Be Less Than 0');
+      setShowAlert(true);
+      return
+    }
     try {
       const body = {
         id: formData.id,
@@ -160,6 +196,7 @@ const Networth: React.FC = () => {
 
   return (
     <>
+       {showAlert && <CustomAlert message={alertMessage} onClose={() => setShowAlert(false)} />}
       {/* <div className='h-[41rem] overflow-auto bg-white p-4 rounded-sm flex flex-col flex-1'> */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
         {datas &&
@@ -188,15 +225,34 @@ const Networth: React.FC = () => {
                     }>
                     Edit
                   </button>
-                  <button
-                    className='flex-1 bg-red-500 text-white px-4 py-2 border border-gray-200'
-                    onClick={() => handleDelete(data.id)}>
-                    Delete
-                  </button>
+                 
+                  <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button
+                      className='flex-1 bg-red-500 text-white px-4 py-2 border border-gray-200'
+                      onClick={() => setDeleteId(data.id)}
+                    >
+                      Delete
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure you want to delete?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the item.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)}>Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
                 </div>
               </div>
             </div>
           ))}
+          
         <div
           className='bg-white shadow-md rounded-lg p-6 flex flex-col border border-gray-200 items-center justify-center w-70 h-40'
           onClick={openModal}>
@@ -263,6 +319,7 @@ const Networth: React.FC = () => {
                     type='number'
                     id='value'
                     name='value'
+                    min={0}
                     value={formData.value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
@@ -273,11 +330,11 @@ const Networth: React.FC = () => {
                     type='number'
                     id='base_value'
                     name='base_value'
+                    min={0}
                     value={formData.base_value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-
                   <label htmlFor='type'>Type</label>
                   <select
                     id='type'
@@ -368,6 +425,7 @@ const Networth: React.FC = () => {
                     type='number'
                     id='value'
                     name='value'
+                    min={0}
                     value={formData.value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
@@ -378,6 +436,7 @@ const Networth: React.FC = () => {
                     type='number'
                     id='base_value'
                     name='base_value'
+                    min={0}
                     value={formData.base_value}
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
