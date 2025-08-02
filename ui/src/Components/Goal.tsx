@@ -11,6 +11,20 @@ import Goal_UltimateFinder from '../Apis/Goal_UltimateFinder'
 import Goal_OtherFinder from '../Apis/Goal_OtherFinder'
 import NetworthFinder from '@/Apis/NetworthFinder'
 
+import CustomAlert from '../Components/ui/custom-alert'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../Components/ui/alert-dialog"
+
+
 interface FormData {
   id: number
   name: string
@@ -42,6 +56,10 @@ const Goal: React.FC = () => {
   //Goal Other Modal
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
+
+  const [alertMessage, setAlertMessage] = useState<string>('');
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+
   //FormData
   const [goalOther, setGoalOther] = useState('')
   const [formData, setFormData] = useState<FormData>({
@@ -52,7 +70,7 @@ const Goal: React.FC = () => {
     image_source: '',
     status: false,
   })
-
+  const [deleteId, setDeleteId] = useState<number | null>(null);
   const handleChangeGoalOther = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
@@ -181,6 +199,16 @@ const Goal: React.FC = () => {
 
   const handleSubmitGoalUltimate = async (e) => {
     e.preventDefault()
+    if(!formData.name){
+      setAlertMessage('Name Cannot Be Empty');
+      setShowAlert(true);
+      return
+    }
+    if(formData.target_value<0){
+      setAlertMessage('Value Cannot Be Less Than 0');
+      setShowAlert(true);
+      return
+    }
     try {
       const body = {
         name: formData.name,
@@ -197,6 +225,12 @@ const Goal: React.FC = () => {
 
   const handleSubmitGoalOther = async (e) => {
     e.preventDefault()
+    if(!formData.name){
+      setAlertMessage('Name Cannot Be Empty');
+      setShowAlert(true);
+      return
+    }
+    
     try {
       const body = {
         name: goalOther,
@@ -221,6 +255,7 @@ const Goal: React.FC = () => {
     } catch (error) {
       console.log(error)
     }
+    setDeleteId(null) 
   }
 
   const handleDeleteGoalOther = async (id: number) => {
@@ -236,6 +271,7 @@ const Goal: React.FC = () => {
     } catch (err) {
       console.log(err)
     }
+    setDeleteId(null) 
   }
 
   const fetchData = async () => {
@@ -278,6 +314,7 @@ const Goal: React.FC = () => {
 
   return (
     <>
+    {showAlert && <CustomAlert message={alertMessage} onClose={() => setShowAlert(false)} />}
       {/* <div className="bg-[url('./src/assets/Cloud.jpeg')] m-auto grid place-items-center"> */}
       {/* <div className="bg-[url('bg.jpg')] m-auto grid place-items-center min-h-screen"> */}
       <div className='tab-section bg-gray-100 p-4 rounded-lg backdrop-filter backdrop-blur-lg bg-opacity-40 min-h-[650px] border-2 border-indigo-200'>
@@ -359,11 +396,28 @@ const Goal: React.FC = () => {
                             }>
                             Update
                           </button>
-                          <button
-                            className='bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600'
-                            onClick={() => handleDeleteGoalUltimate(data.id)}>
-                            Delete
-                          </button>
+                          <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              className='bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600'
+                              onClick={() => setDeleteId(data.id)}
+                            >
+                              Delete
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure you want to delete?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the item.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction  onClick={() => handleDeleteGoalUltimate(data.id)}>Continue</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                         </div>
                       </div>
                     </div>
