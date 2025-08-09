@@ -2,44 +2,27 @@
  * @see https://www.electron.build/configuration/configuration
  */
 {
-  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "YourAppID",
-  "asar": true,
-  "productName": "YourAppName",
-  "directories": {
-    "output": "release/${version}"
+  appId: 'com.fortune.NextLife',
+  productName: 'NextLife',
+  copyright: 'Copyright © 2023 Your Company',
+  directories: {
+    output: 'dist',
+    buildResources: 'buildResources',
   },
-  "files": [
-    "dist",
-    "dist-electron"
-  ],
-  "mac": {
-    "target": [
-      "dmg"
-    ],
-    "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
+  files: ['dist-electron/**/*', 'dist/**/*'],
+  win: {
+    target: ['nsis'],
+    icon: 'public/favicon.ico', // Make sure you have this icon file
+    requestedExecutionLevel: 'asInvoker',
   },
-  "win": {
-    "target": [
-      {
-        "target": "nsis",
-        "arch": [
-          "x64"
-        ]
-      }
-    ],
-    "artifactName": "${productName}-Windows-${version}-Setup.${ext}"
+  nsis: {
+    oneClick: false,
+    perMachine: false,
+    allowToChangeInstallationDirectory: true,
+    deleteAppDataOnUninstall: false,
+    installerIcon: 'public/favicon.ico',
+    uninstallerIcon: 'public/favicon.ico',
+    createDesktopShortcut: true,
+    createStartMenuShortcut: true,
   },
-  "nsis": {
-    "oneClick": false,
-    "perMachine": false,
-    "allowToChangeInstallationDirectory": true,
-    "deleteAppDataOnUninstall": false
-  },
-  "linux": {
-    "target": [
-      "AppImage"
-    ],
-    "artifactName": "${productName}-Linux-${version}.${ext}"
-  }
 }

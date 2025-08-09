@@ -1,62 +1,96 @@
-import { app, BrowserWindow } from 'electron'
-import path from 'node:path'
+import { app, BrowserWindow } from 'electron';
+import path from 'node:path';
+import { spawn } from 'child_process';
 
-// The built directory structure
-//
-// ├─┬─┬ dist
-// │ │ └── index.html
-// │ │
-// │ ├─┬ dist-electron
-// │ │ ├── main.js
-// │ │ └── preload.js
-// │
-process.env.DIST = path.join(__dirname, '../dist')
-process.env.VITE_PUBLIC = app.isPackaged ? process.env.DIST : path.join(process.env.DIST, '../public')
+let win: BrowserWindow | null = null;
 
+// Set environment variables for asset paths
+process.env.DIST = path.join(__dirname, '../dist');
+process.env.VITE_PUBLIC = app.isPackaged
+  ? process.env.DIST
+  : path.join(process.env.DIST, '../public');
 
-let win: BrowserWindow | null
-// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
-const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
+// Use ['ENV_VAR'] to avoid Vite define plugin issues
+const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
+
+function startServers(): Promise<void> {
+  return Promise.all([
+    new Promise<void>((resolve, reject) => {
+      const server1 = spawn('npm', ['start'], {
+        cwd: 'C:\\Users\\spiri\\Documents\\NextLife',
+        shell: true,
+        stdio: 'inherit',
+        windowsHide: true
+      });
+
+      server1.on('error', reject);
+
+      // Adjust timeout or better wait for a ready event
+      setTimeout(() => resolve(), 3000);
+    }),
+
+    new Promise<void>((resolve, reject) => {
+      const server2 = spawn('npm', ['run', 'dev'], {
+        cwd: 'C:\\Users\\spiri\\Documents\\NextLife\\ui',
+        shell: true,
+        stdio: 'inherit',
+        windowsHide: true
+      });
+
+      server2.on('error', reject);
+
+      setTimeout(() => resolve(), 3000);
+    }),
+  ]).then(() => undefined);
+}
 
 function createWindow() {
   win = new BrowserWindow({
     width: 1920,
     height: 1080,
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: path.join(process.env.VITE_PUBLIC!, 'electron-vite.svg'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      webSecurity: false
     },
-  })
+  });
 
-  // Test active push message to Renderer-process.
+  // Send a test message to renderer when loaded
   win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', (new Date).toLocaleString())
-  })
+    win?.webContents.send('main-process-message', new Date().toLocaleString());
+  });
 
-  if (VITE_DEV_SERVER_URL) {
-    win.loadURL(VITE_DEV_SERVER_URL)
-  } else {
-    // win.loadFile('dist/index.html')
-    win.loadFile(path.join(process.env.DIST, 'index.html'))
-  }
+  // Load from dev server or built file
+  // if (VITE_DEV_SERVER_URL) {
+  //   win.loadURL(VITE_DEV_SERVER_URL);
+  // } 
+  // else {
+  //   win.loadFile(path.join(process.env.DIST!, 'ui/index.html'));
+  // }
+  win.loadURL('http://localhost:5173');
 }
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+// Handle macOS app behavior
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit()
-    win = null
+    win = null;
+    app.quit();
   }
-})
+});
 
 app.on('activate', () => {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow()
+    createWindow();
   }
-})
+});
 
-app.whenReady().then(createWindow)
+// Start the app
+// app.whenReady().then(createWindow);
+
+app.whenReady()
+  .then(() => startServers()) // start server before UI
+  .then(() => createWindow())
+  .catch((err) => {
+    console.error('Failed to start server:', err);
+    app.quit();
+  });
