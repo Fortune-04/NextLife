@@ -29,8 +29,8 @@ app.get("/networth", async (req, res) => {
 app.post("/networth", async (req, res) => {
   try {
     const results = await db.query(
-      "INSERT INTO networth (name, value, base_value, type) VALUES ($1,$2,$3,$4) RETURNING *",
-      [req.body.name, req.body.value, req.body.base_value, req.body.type]
+      "INSERT INTO networth (name, value, base_value, goal_ultimate_id, type) VALUES ($1,$2,$3,$4,$5) RETURNING *",
+      [req.body.name, req.body.value, req.body.base_value, req.body.goal_ultimate_id, req.body.type]
     );
     res.status(201).json({
       status: "success",
@@ -63,11 +63,12 @@ app.delete("/networth/:id", async (req, res) => {
 app.put("/networth", async (req, res) => {
   try {
     const results = await db.query(
-      "UPDATE networth SET name=$1, value=$2, base_value=$3, type=$4 WHERE id=$5 RETURNING *",
+      "UPDATE networth SET name=$1, value=$2, base_value=$3, goal_ultimate_id=$4, type=$5 WHERE id=$6 RETURNING *",
       [
         req.body.name,
         req.body.value,
         req.body.base_value,
+        req.body.goal_ultimate_id,
         req.body.type,
         req.body.id,
       ]
@@ -340,6 +341,30 @@ app.put("/goal/ultimate", async (req, res) => {
       },
     });
     console.log("API Called : Update a goal_ultimate");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//UPDATE a Goal_Ultimate target value
+app.put("/goal/ultimate/target", async (req, res) => {
+  console.log(req.body)
+  try {
+    const results = await db.query(
+      "UPDATE goal_ultimate SET name=$1, target_value=$2 WHERE id=$3 RETURNING *",
+      [
+        req.body.name,
+        req.body.target_value,
+        req.body.id
+      ]
+    );
+    res.status(200).json({
+      status: "success",
+      data: {
+        goal_ultimate: results.rows[0],
+      },
+    });
+    console.log("API Called : Update a goal_ultimate target");
   } catch (error) {
     console.log(error);
   }

@@ -22,8 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../Components/ui/alert-dialog"
-
+} from '../Components/ui/alert-dialog'
 
 interface FormData {
   id: number
@@ -48,6 +47,7 @@ const Goal: React.FC = () => {
   const [networthDatas, setNetworthDatas] = useState<NetworthData[]>([])
   const [goalUltimateDatas, setGoalUltimateDatas] = useState<any[]>([])
   const [goalOtherDatas, setGoalOtherDatas] = useState<any[]>([])
+
   //Tab
   const [activeTab, setActiveTab] = useState<string>('#tab1')
   //Goal Ultimate Modal
@@ -57,8 +57,8 @@ const Goal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
 
-  const [alertMessage, setAlertMessage] = useState<string>('');
-  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>('')
+  const [showAlert, setShowAlert] = useState<boolean>(false)
 
   //FormData
   const [goalOther, setGoalOther] = useState('')
@@ -70,7 +70,7 @@ const Goal: React.FC = () => {
     image_source: '',
     status: false,
   })
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [deleteId, setDeleteId] = useState<number | null>(null)
   const handleChangeGoalOther = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
@@ -179,34 +179,32 @@ const Goal: React.FC = () => {
   }, []) // Empty dependency array to run once on mount
 
   const handleUpdate = async (e) => {
-    // e.preventDefault()
-    // try {
-    //   const body = {
-    //     id: formData.id,
-    //     name: formData.name,
-    //     target_value: formData.tavalue,
-    //     curent_value: formData.base_value,
-    //     investment: formData.investment,
-    //   }
-    //   const response = await NetworthFinder.put(`/`, body)
-    //   setDatas([])
-    //   fetchData()
-    // } catch (error) {
-    //   console.log(error)
-    // }
-    // setIsUpdateOpen(false)
+    e.preventDefault()
+    try {
+      const body = {
+        id: formData.id,
+        name: formData.name,
+        target_value: formData.target_value,
+        status: false,
+      }
+      const response = await Goal_UltimateFinder.put(`/target`, body)
+      fetchData()
+    } catch (error) {
+      console.log(error)
+    }
+    closeUpdateModal()
   }
 
   const handleSubmitGoalUltimate = async (e) => {
     e.preventDefault()
-    if(!formData.name){
-      setAlertMessage('Name Cannot Be Empty');
-      setShowAlert(true);
+    if (!formData.name) {
+      setAlertMessage('Name Cannot Be Empty')
+      setShowAlert(true)
       return
     }
-    if(formData.target_value<0){
-      setAlertMessage('Value Cannot Be Less Than 0');
-      setShowAlert(true);
+    if (formData.target_value < 0) {
+      setAlertMessage('Value Cannot Be Less Than 0')
+      setShowAlert(true)
       return
     }
     try {
@@ -225,12 +223,12 @@ const Goal: React.FC = () => {
 
   const handleSubmitGoalOther = async (e) => {
     e.preventDefault()
-    if(!formData.name){
-      setAlertMessage('Name Cannot Be Empty');
-      setShowAlert(true);
+    if (!formData.name) {
+      setAlertMessage('Name Cannot Be Empty')
+      setShowAlert(true)
       return
     }
-    
+
     try {
       const body = {
         name: goalOther,
@@ -255,7 +253,7 @@ const Goal: React.FC = () => {
     } catch (error) {
       console.log(error)
     }
-    setDeleteId(null) 
+    setDeleteId(null)
   }
 
   const handleDeleteGoalOther = async (id: number) => {
@@ -271,7 +269,7 @@ const Goal: React.FC = () => {
     } catch (err) {
       console.log(err)
     }
-    setDeleteId(null) 
+    setDeleteId(null)
   }
 
   const fetchData = async () => {
@@ -314,7 +312,12 @@ const Goal: React.FC = () => {
 
   return (
     <>
-    {showAlert && <CustomAlert message={alertMessage} onClose={() => setShowAlert(false)} />}
+      {showAlert && (
+        <CustomAlert
+          message={alertMessage}
+          onClose={() => setShowAlert(false)}
+        />
+      )}
       {/* <div className="bg-[url('./src/assets/Cloud.jpeg')] m-auto grid place-items-center"> */}
       {/* <div className="bg-[url('bg.jpg')] m-auto grid place-items-center min-h-screen"> */}
       <div className='tab-section bg-gray-100 p-4 rounded-lg backdrop-filter backdrop-blur-lg bg-opacity-40 min-h-[650px] border-2 border-indigo-200'>
@@ -397,27 +400,37 @@ const Goal: React.FC = () => {
                             Update
                           </button>
                           <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <button
-                              className='bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600'
-                              onClick={() => setDeleteId(data.id)}
-                            >
-                              Delete
-                            </button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure you want to delete?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the item.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>
-                              <AlertDialogAction  onClick={() => handleDeleteGoalUltimate(data.id)}>Continue</AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button
+                                className='bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600'
+                                onClick={() => setDeleteId(data.id)}>
+                                Delete
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you sure you want to delete?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently delete the item.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel
+                                  onClick={() => setDeleteId(null)}>
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleDeleteGoalUltimate(data.id)
+                                  }>
+                                  Continue
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </div>
                       </div>
                     </div>
@@ -538,18 +551,6 @@ const Goal: React.FC = () => {
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
 
-                  <label htmlFor='investment'>Current</label>
-                  <select
-                    id='investment'
-                    name='investment'
-                    value={formData.current_value}
-                    onChange={handleChange}
-                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
-                    <option value=''>Select Type</option>
-                    <option value='true'>Yes</option>
-                    <option value='false'>No</option>
-                  </select>
-
                   <div className='flex justify-between'>
                     <button
                       type='submit'
@@ -632,21 +633,6 @@ const Goal: React.FC = () => {
                     onChange={handleChange}
                     className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-
-                  <label htmlFor='fund'>Fund :</label>
-                  <select
-                    id='fund'
-                    name='fund'
-                    onChange={handleChange}
-                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
-                    <option value=''>Select</option>
-                    {networthDatas &&
-                      networthDatas.map((data) => (
-                        <option key={data.id} value='saving'>
-                          {data.name}
-                        </option>
-                      ))}
-                  </select>
 
                   <div className='flex justify-between'>
                     <button

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import CustomAlert from '../Components/ui/custom-alert'
 import {
   AlertDialog,
@@ -10,10 +10,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../Components/ui/alert-dialog"
+} from '../Components/ui/alert-dialog'
 
 //API finder
 import NetworthFinder from '../Apis/NetworthFinder'
+import Goal_UltimateFinder from '@/Apis/Goal_UltimateFinder'
 
 //Import icon
 import { PlusIcon } from '@heroicons/react/24/solid'
@@ -23,33 +24,54 @@ interface FormData {
   name: string
   value: number
   base_value: number
+  goal_ultimate_id?: number | undefined
   type: string
+}
+
+interface GoalUltimateData {
+  id: number
+  name: string
+  target_value: number
+  current_value: number
+  image_source: string
+  status: boolean
 }
 
 const Networth: React.FC = () => {
   //Temporary data
   const [datas, setDatas] = useState<FormData[]>([])
+  const [goalUltimateDatas, setGoalUltimateDatas] = useState<
+    GoalUltimateData[]
+  >([])
   //Modal
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
   //FormData
-  const [alertMessage, setAlertMessage] = useState<string>('');
-  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertMessage, setAlertMessage] = useState<string>('')
+  const [showAlert, setShowAlert] = useState<boolean>(false)
   const [formData, setFormData] = useState<FormData>({
     id: 0,
     name: '',
     value: 0,
     base_value: 0,
+    goal_ultimate_id: 0,
     type: 'Select',
   })
+
   const [deleteId, setDeleteId] = useState<number | null>(null)
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
+
     setFormData((prevFormData) => ({
       ...prevFormData,
-      [name]: value,
+      [name]:
+        name === 'goal_ultimate_id' || name === 'value' || name === 'base_value'
+          ? value === ''
+            ? undefined
+            : Number(value) // convert string → number safely
+          : value,
     }))
   }
 
@@ -64,6 +86,7 @@ const Networth: React.FC = () => {
       name: '',
       value: 0,
       base_value: 0,
+      goal_ultimate_id: 0,
       type: 'Select',
     })
     setIsOpen(false)
@@ -74,6 +97,7 @@ const Networth: React.FC = () => {
     name: string,
     value: number,
     base_value: number,
+    goal_ultimate_id: number | undefined,
     type: string
   ) => {
     setFormData({
@@ -82,6 +106,7 @@ const Networth: React.FC = () => {
       name: name,
       value: value,
       base_value: base_value,
+      goal_ultimate_id: goal_ultimate_id,
       type: type,
     })
     setIsUpdateOpen(true)
@@ -94,6 +119,7 @@ const Networth: React.FC = () => {
       name: '',
       value: 0,
       base_value: 0,
+      goal_ultimate_id: 0,
       type: 'Select',
     })
     setIsUpdateOpen(false)
@@ -101,22 +127,23 @@ const Networth: React.FC = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if(!formData.name){
-      setAlertMessage('Name Cannot Be Empty');
-      setShowAlert(true);
+    if (!formData.name) {
+      setAlertMessage('Name Cannot Be Empty')
+      setShowAlert(true)
       return
     }
-    if(formData.value<0 || formData.base_value<0){
-      setAlertMessage('Value Cannot Be Less Than 0');
-      setShowAlert(true);
+    if (formData.value < 0 || formData.base_value < 0) {
+      setAlertMessage('Value Cannot Be Less Than 0')
+      setShowAlert(true)
       return
     }
-    
+
     try {
       const body = {
         name: formData.name,
         value: formData.value,
         base_value: formData.base_value,
+        goal_ultimate_id: formData.goal_ultimate_id,
         type: formData.type,
       }
       console.log(body)
@@ -142,19 +169,19 @@ const Networth: React.FC = () => {
     } catch (err) {
       console.log(err)
     }
-    setDeleteId(null) 
+    setDeleteId(null)
   }
 
   const handleUpdate = async (e) => {
     e.preventDefault()
-    if(!formData.name){
-      setAlertMessage('Name Cannot Be Empty');
-      setShowAlert(true);
+    if (!formData.name) {
+      setAlertMessage('Name Cannot Be Empty')
+      setShowAlert(true)
       return
     }
-    if(formData.value<0 || formData.base_value<0){
-      setAlertMessage('Value Cannot Be Less Than 0');
-      setShowAlert(true);
+    if (formData.value < 0 || formData.base_value < 0) {
+      setAlertMessage('Value Cannot Be Less Than 0')
+      setShowAlert(true)
       return
     }
     try {
@@ -163,9 +190,11 @@ const Networth: React.FC = () => {
         name: formData.name,
         value: formData.value,
         base_value: formData.base_value,
+        goal_ultimate_id: formData.goal_ultimate_id,
         type: formData.type,
       }
       const response = await NetworthFinder.put(`/`, body)
+      console.log(response)
       setDatas([])
       fetchData()
     } catch (error) {
@@ -188,15 +217,38 @@ const Networth: React.FC = () => {
     } catch (error) {
       console.log(error)
     }
+    try {
+      const response = await Goal_UltimateFinder.get('/')
+      console.log(response.data)
+      const goalData = response.data.data.goal_ultimate
+      if (goalData.length > 0) {
+        setGoalUltimateDatas(response.data.data.goal_ultimate)
+      }
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   useEffect(() => {
     fetchData()
   }, [])
 
+  const goalMap = useMemo(() => {
+    const map: Record<number, string> = {}
+    goalUltimateDatas.forEach((goal) => {
+      map[goal.id] = goal.name
+    })
+    return map
+  }, [goalUltimateDatas])
+
   return (
     <>
-       {showAlert && <CustomAlert message={alertMessage} onClose={() => setShowAlert(false)} />}
+      {showAlert && (
+        <CustomAlert
+          message={alertMessage}
+          onClose={() => setShowAlert(false)}
+        />
+      )}
       {/* <div className='h-[41rem] overflow-auto bg-white p-4 rounded-sm flex flex-col flex-1'> */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
         {datas &&
@@ -205,7 +257,12 @@ const Networth: React.FC = () => {
               key={data.id}
               className='bg-white rounded-lg overflow-hidden shadow-md border border-gray-200'>
               <div className='p-6'>
-                <h2 className='text-lg font-semibold mb-4'>{data.name}</h2>
+                <h2 className='text-lg font-semibold mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center'>
+                  <span>{data.name}</span>
+                  <span className='opacity-60 text-sm sm:text-right'>
+                    {goalMap[data.goal_ultimate_id ?? 0]}
+                  </span>
+                </h2>
                 <p className='text-gray-700'>{data.value}</p>
               </div>
               <div className='flex flex-col h-full bg-gray-100'>
@@ -220,39 +277,47 @@ const Networth: React.FC = () => {
                         data.name,
                         data.value,
                         data.base_value,
+                        data.goal_ultimate_id,
                         data.type
                       )
                     }>
                     Edit
                   </button>
-                 
+
                   <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <button
-                      className='flex-1 bg-red-500 text-white px-4 py-2 border border-gray-200'
-                      onClick={() => setDeleteId(data.id)}
-                    >
-                      Delete
-                    </button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you sure you want to delete?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the item.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel onClick={() => setDeleteId(null)}>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => deleteId && handleDelete(deleteId)}>Continue</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className='flex-1 bg-red-500 text-white px-4 py-2 border border-gray-200'
+                        onClick={() => setDeleteId(data.id)}>
+                        Delete
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you sure you want to delete?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete the item.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setDeleteId(null)}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteId && handleDelete(deleteId)}>
+                          Continue
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </div>
           ))}
-          
+
         <div
           className='bg-white shadow-md rounded-lg p-6 flex flex-col border border-gray-200 items-center justify-center w-70 h-40'
           onClick={openModal}>
@@ -346,6 +411,21 @@ const Networth: React.FC = () => {
                     <option value='saving'>Saving</option>
                     <option value='invest'>Investment</option>
                     <option value='trading'>Trading</option>
+                  </select>
+
+                  <label htmlFor='goal'>Goal</label>
+                  <select
+                    id='goal_ultimate_id'
+                    name='goal_ultimate_id'
+                    value={formData.goal_ultimate_id?.toString() || ''} // controlled input as string
+                    onChange={handleChange}
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
+                    <option value=''>Select Goal</option>
+                    {goalUltimateDatas.map((goal) => (
+                      <option key={goal.id} value={goal.id.toString()}>
+                        {goal.name}
+                      </option>
+                    ))}
                   </select>
 
                   <div className='flex justify-between'>
@@ -453,6 +533,21 @@ const Networth: React.FC = () => {
                     <option value='saving'>Saving</option>
                     <option value='invest'>Investment</option>
                     <option value='trading'>Trading</option>
+                  </select>
+
+                  <label htmlFor='goal'>Goal</label>
+                  <select
+                    id='goal_ultimate_id'
+                    name='goal_ultimate_id'
+                    value={formData.goal_ultimate_id?.toString() || ''} // controlled input as string
+                    onChange={handleChange}
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
+                    <option value=''>Select Goal</option>
+                    {goalUltimateDatas.map((goal) => (
+                      <option key={goal.id} value={goal.id.toString()}>
+                        {goal.name}
+                      </option>
+                    ))}
                   </select>
 
                   <div className='flex justify-between'>
