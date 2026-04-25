@@ -1,4 +1,4 @@
-# NextLife v2.1.2
+# NextLife v2.2.1
 
 > **Aim for the future** — A personal finance and life-tracking desktop application.
 
