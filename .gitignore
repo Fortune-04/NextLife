@@ -4,3 +4,8 @@ ui/node_modules
 
 # environment variables
 .env
+
+# SQLite database
+*.db
+*.db-wal
+*.db-shm

@@ -1,5 +1,16 @@
 import { useState, useEffect, ReactNode } from 'react'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './ui/alert-dialog'
+
 //Import icon
 import { CurrencyDollarIcon } from '@heroicons/react/24/solid'
 import { BanknotesIcon } from '@heroicons/react/24/solid'
@@ -52,6 +63,7 @@ const Dashboard = () => {
   const [totalBusinessProfit, setTotalBusinessProfit] = useState(0)
   const [totalBusinessProfitIncrement, setTotalBusinessProfitIncrement] =
     useState(0)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   const handleUpdate = async () => {
     let monthly_income = total_networth - preNetworth
@@ -172,133 +184,190 @@ const Dashboard = () => {
     value: item.total_networth,
   }))
 
+  const fmtRM = (v: number) =>
+    `RM ${Number(v).toLocaleString('en-MY', { minimumFractionDigits: 2 })}`
+
+  const IncrementBadge = ({ value }: { value: number }) => {
+    if (value === 0) return null
+    const isPositive = value > 0
+    return (
+      <span
+        className={`inline-flex items-center gap-0.5 text-xs font-medium px-2 py-0.5 rounded-full ${
+          isPositive
+            ? 'bg-emerald-50 text-emerald-600'
+            : 'bg-red-50 text-red-500'
+        }`}>
+        {isPositive ? (
+          <svg className='w-3 h-3' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2.5}>
+            <path strokeLinecap='round' strokeLinejoin='round' d='M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25' />
+          </svg>
+        ) : (
+          <svg className='w-3 h-3' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2.5}>
+            <path strokeLinecap='round' strokeLinejoin='round' d='M4.5 4.5l15 15m0 0V8.25m0 11.25H8.25' />
+          </svg>
+        )}
+        {isPositive ? '+' : ''}{fmtRM(value)}
+      </span>
+    )
+  }
+
+  const statCards = [
+    {
+      label: 'Total Networth',
+      value: total_networth,
+      increment: null,
+      icon: <CurrencyDollarIcon className='h-5 w-5' />,
+      iconBg: 'bg-indigo-100 text-indigo-600',
+      onClick: () => setShowConfirmDialog(true),
+    },
+    {
+      label: 'Investment Profit',
+      value: totalInvestProfit,
+      increment: totalInvestProfitIncrement,
+      icon: <BanknotesIcon className='h-5 w-5' />,
+      iconBg: 'bg-violet-100 text-violet-600',
+    },
+    {
+      label: 'Trading Profit',
+      value: totalTradingProfit,
+      increment: totalTradingProfitIncrement,
+      icon: <ArrowTrendingUpIcon className='h-5 w-5' />,
+      iconBg: 'bg-amber-100 text-amber-600',
+    },
+    {
+      label: 'Business Profit',
+      value: totalBusinessProfit,
+      increment: totalBusinessProfitIncrement,
+      icon: <ChevronDoubleUpIcon className='h-5 w-5' />,
+      iconBg: 'bg-emerald-100 text-emerald-600',
+    },
+  ]
+
   return (
-    <>
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
-        <BoxWrapper>
-          <button className='rounded-full h-12 w-12 flex items-center justify-center bg-sky-500'>
-            <CurrencyDollarIcon
-              className='text-2xl text-white'
+    <div className='flex flex-col h-full'>
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent className='max-w-sm rounded-2xl border-0 p-0 overflow-hidden shadow-xl'>
+          <div className='bg-gradient-to-br from-indigo-500 to-indigo-600 px-6 pt-6 pb-5 text-center'>
+            <div className='mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm'>
+              <ArrowTrendingUpIcon className='h-6 w-6 text-white' />
+            </div>
+            <AlertDialogHeader className='space-y-1'>
+              <AlertDialogTitle className='text-lg font-semibold text-white text-center'>
+                Update Networth Graph
+              </AlertDialogTitle>
+              <AlertDialogDescription className='text-sm text-indigo-100 text-center'>
+                This will record a new data point on the graph.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+          </div>
+          <div className='px-6 py-4'>
+            <div className='rounded-xl bg-gray-50 p-3 text-center'>
+              <span className='text-xs font-medium text-gray-400 uppercase tracking-wider'>Current Networth</span>
+              <p className='text-xl font-bold text-gray-900 mt-0.5'>{fmtRM(total_networth)}</p>
+            </div>
+          </div>
+          <AlertDialogFooter className='flex-row gap-3 px-6 pb-5 pt-0 sm:space-x-0'>
+            <AlertDialogAction
               onClick={handleUpdate}
-            />
-          </button>
-          <div className='pl-4'>
-            <span className='text-sm text-gray-500 font-light'>
-              Total Networth
-            </span>
-            <div className='flex items-center'>
-              <strong className='text-xl text-gray-700 font-semibold'>
-                ${total_networth}
-              </strong>
+              className='flex-1 m-0 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700'>
+              Confirm
+            </AlertDialogAction>
+            <AlertDialogCancel className='flex-1 m-0 rounded-xl border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900'>
+              Cancel
+            </AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Stat Cards */}
+      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 shrink-0'>
+        {statCards.map((card, i) => (
+          <div
+            key={i}
+            className='bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-default'
+            onClick={card.onClick}>
+            <div className='flex items-center justify-between mb-3'>
+              <span className='text-xs font-medium text-gray-400 uppercase tracking-wider'>
+                {card.label}
+              </span>
+              <div
+                className={`w-8 h-8 rounded-lg flex items-center justify-center ${card.iconBg}`}>
+                {card.icon}
+              </div>
             </div>
+            <p className='text-2xl font-bold text-gray-900 mb-1'>
+              {fmtRM(card.value)}
+            </p>
+            {card.increment !== null && (
+              <IncrementBadge value={card.increment} />
+            )}
           </div>
-        </BoxWrapper>
-        <BoxWrapper>
-          <div className='rounded-full h-12 w-12 flex items-center justify-center bg-orange-600'>
-            <BanknotesIcon className='text-2xl text-white' />
-          </div>
-          <div className='pl-4'>
-            <span className='text-sm text-gray-500 font-light'>
-              Investment Profit
-            </span>
-            <div className='flex items-center'>
-              <strong className='text-xl text-gray-700 font-semibold'>
-                ${totalInvestProfit}
-                {/* $<InvestmentProfit type='profit' /> */}
-              </strong>
-              {totalInvestProfitIncrement > 0 ? (
-                <span className='text-sm text-green-500 pl-2'>
-                  +{totalInvestProfitIncrement}
-                </span>
-              ) : (
-                <span className='text-sm text-red-500 pl-2'>
-                  {totalInvestProfitIncrement}
-                </span>
-              )}
-            </div>
-          </div>
-        </BoxWrapper>
-        <BoxWrapper>
-          <div className='rounded-full h-12 w-12 flex items-center justify-center bg-yellow-400'>
-            <ArrowTrendingUpIcon className='text-2xl text-white' />
-          </div>
-          <div className='pl-4'>
-            <span className='text-sm text-gray-500 font-light'>
-              Trading Profit
-            </span>
-            <div className='flex items-center'>
-              <strong className='text-xl text-gray-700 font-semibold'>
-                ${totalTradingProfit}
-              </strong>
-              {totalTradingProfitIncrement > 0 ? (
-                <span className='text-sm text-green-500 pl-2'>
-                  +{totalTradingProfitIncrement}
-                </span>
-              ) : (
-                <span className='text-sm text-red-500 pl-2'>
-                  {totalTradingProfitIncrement}
-                </span>
-              )}
-            </div>
-          </div>
-        </BoxWrapper>
-        <BoxWrapper>
-          <div className='rounded-full h-12 w-12 flex items-center justify-center bg-green-600'>
-            <ChevronDoubleUpIcon className='text-2xl text-white' />
-          </div>
-          <div className='pl-4'>
-            <span className='text-sm text-gray-500 font-light'>
-              Business Profit
-            </span>
-            <div className='flex items-center'>
-              <strong className='text-xl text-gray-700 font-semibold'>
-                ${totalBusinessProfit.toFixed(2)}
-                {/* $<BusinessProfit type='profit' /> */}
-              </strong>
-              {totalBusinessProfitIncrement > 0 ? (
-                <span className='text-sm text-green-500 pl-2'>
-                  +{totalBusinessProfitIncrement.toFixed(2)}
-                </span>
-              ) : (
-                <span className='text-sm text-red-500 pl-2'>
-                  {totalBusinessProfitIncrement.toFixed(2)}
-                </span>
-              )}
-            </div>
-          </div>
-        </BoxWrapper>
+        ))}
       </div>
 
-      {/* <div className='flex flex-col flex-1'> */}
-      <div className='h-[38rem] overflow-auto mt-3 p-3 rounded-sm border border-gray-200 flex flex-col flex-1'>
-        <h2 className='text-lg font-semibold text-gray-700 mb-4 text-center'>
-          Networth vs Time
-        </h2>
-        <ResponsiveContainer width='100%' height='100%'>
-          <LineChart
-            data={processedData}
-            margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
-            <CartesianGrid strokeDasharray='3 3' />
-            <XAxis dataKey='date' />
-            <YAxis />
-            <Tooltip />
-            <Line type='monotone' dataKey='value' stroke='#8884d8' />
-          </LineChart>
-        </ResponsiveContainer>
+      {/* Chart */}
+      <div className='flex-1 min-h-0 mt-4 bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col'>
+        {datas.length === 0 ? (
+          <div className='flex-1 flex flex-col items-center justify-center'>
+            <div className='w-14 h-14 rounded-full bg-gray-50 flex items-center justify-center mb-4'>
+              <ArrowTrendingUpIcon className='h-7 w-7 text-gray-300' />
+            </div>
+            <p className='text-gray-400 text-lg'>Add networth to view the graph</p>
+          </div>
+        ) : (
+          <>
+            <div className='text-center mb-4'>
+              <h2 className='text-base font-semibold text-gray-800' style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+                Networth Over Time
+              </h2>
+              <span className='text-xs text-gray-400'>
+                {processedData.length} data point{processedData.length !== 1 ? 's' : ''}
+              </span>
+            </div>
+            <div className='flex-1'>
+              <ResponsiveContainer width='100%' height='100%'>
+                <LineChart
+                  data={processedData}
+                  margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray='3 3' stroke='#f1f5f9' />
+                  <XAxis
+                    dataKey='date'
+                    tick={{ fontSize: 12, fill: '#94a3b8' }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e2e8f0' }}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: '#94a3b8' }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e2e8f0' }}
+                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                      padding: '10px 14px',
+                      fontSize: '13px',
+                    }}
+                    formatter={(value: number) => [fmtRM(value), 'Networth']}
+                    labelStyle={{ color: '#94a3b8', fontSize: '12px', marginBottom: '4px' }}
+                  />
+                  <Line
+                    type='monotone'
+                    dataKey='value'
+                    stroke='#6366f1'
+                    strokeWidth={2.5}
+                    dot={{ r: 4, fill: '#6366f1', stroke: '#fff', strokeWidth: 2 }}
+                    activeDot={{ r: 6, fill: '#6366f1', stroke: '#fff', strokeWidth: 2 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
       </div>
-      {/* </div> */}
-    </>
-  )
-}
-
-interface BoxWrapperProps {
-  children: ReactNode
-}
-
-const BoxWrapper: React.FC<BoxWrapperProps> = ({ children }) => {
-  return (
-    <div className='bg-white rounded-sm p-4 flex-1 border border-gray-200 flex items-center'>
-      {children}
     </div>
   )
 }
