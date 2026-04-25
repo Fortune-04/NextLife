@@ -2,36 +2,34 @@ import { useState, useEffect, useMemo } from 'react'
 import ModalPortal from './SubComponents/ModalPortal'
 
 //API finder
-import NetworthFinder from '../Apis/NetworthFinder'
-import Goal_UltimateFinder from '@/Apis/Goal_UltimateFinder'
+import AssetFinder from '../Apis/AssetFinder'
+import { NetworthFinder } from '../Apis/api'
 
 //Import icon
-import { PlusIcon, BanknotesIcon, TrashIcon, PencilSquareIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { PlusIcon, CubeIcon, TrashIcon, PencilSquareIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 
 interface FormData {
   id: number
   name: string
   value: number
   base_value: number
-  goal_ultimate_id?: number | undefined
+  value_mode: string
+  networth_id?: number | undefined
+}
+
+interface NetworthData {
+  id: number
+  name: string
+  value: number
+  base_value: number
   type: string
 }
 
-interface GoalUltimateData {
-  id: number
-  name: string
-  target_value: number
-  current_value: number
-  image_source: string
-  status: boolean
-}
 
-const Networth: React.FC = () => {
+const Asset: React.FC = () => {
   //Temporary data
   const [datas, setDatas] = useState<FormData[]>([])
-  const [goalUltimateDatas, setGoalUltimateDatas] = useState<
-    GoalUltimateData[]
-  >([])
+  const [networthDatas, setNetworthDatas] = useState<NetworthData[]>([])
   //Modal
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
@@ -42,8 +40,8 @@ const Networth: React.FC = () => {
     name: '',
     value: 0,
     base_value: 0,
-    goal_ultimate_id: 0,
-    type: 'Select',
+    value_mode: 'rm',
+    networth_id: 0,
   })
 
   const [deleteId, setDeleteId] = useState<number | null>(null)
@@ -55,10 +53,10 @@ const Networth: React.FC = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]:
-        name === 'goal_ultimate_id' || name === 'value' || name === 'base_value'
+        name === 'networth_id' || name === 'value' || name === 'base_value'
           ? value === ''
-            ? undefined
-            : Number(value) // convert string → number safely
+            ? name === 'networth_id' ? undefined : 0
+            : Number(value)
           : value,
     }))
   }
@@ -70,13 +68,13 @@ const Networth: React.FC = () => {
   const closeModal = () => {
     setNameError('')
     setFormData({
-      ...formData, // Keep existing state for other fields
+      ...formData,
       id: 0,
       name: '',
       value: 0,
       base_value: 0,
-      goal_ultimate_id: 0,
-      type: 'Select',
+      value_mode: 'rm',
+      networth_id: 0,
     })
     setIsOpen(false)
   }
@@ -86,8 +84,8 @@ const Networth: React.FC = () => {
     name: string,
     value: number,
     base_value: number,
-    goal_ultimate_id: number | undefined,
-    type: string
+    value_mode: string,
+    networth_id: number | undefined
   ) => {
     setFormData({
       ...formData,
@@ -95,8 +93,8 @@ const Networth: React.FC = () => {
       name: name,
       value: value,
       base_value: base_value,
-      goal_ultimate_id: goal_ultimate_id,
-      type: type,
+      value_mode: value_mode || 'rm',
+      networth_id: networth_id,
     })
     setIsUpdateOpen(true)
   }
@@ -104,13 +102,13 @@ const Networth: React.FC = () => {
   const closeUpdateModal = () => {
     setNameError('')
     setFormData({
-      ...formData, // Keep existing state for other fields
+      ...formData,
       id: 0,
       name: '',
       value: 0,
       base_value: 0,
-      goal_ultimate_id: 0,
-      type: 'Select',
+      value_mode: 'rm',
+      networth_id: 0,
     })
     setIsUpdateOpen(false)
   }
@@ -127,29 +125,25 @@ const Networth: React.FC = () => {
         name: formData.name,
         value: formData.value,
         base_value: formData.base_value,
-        goal_ultimate_id: formData.goal_ultimate_id,
-        type: formData.type,
+        value_mode: formData.value_mode,
+        networth_id: formData.networth_id || null,
       }
-      console.log(body)
-      const response = await NetworthFinder.post('/', body)
+      const response = await AssetFinder.post('/', body)
       fetchData()
     } catch (error) {
       console.log(error)
     }
-    closeModal() // Close the modal after form submission
+    closeModal()
   }
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await NetworthFinder.delete(`/${id}`)
+      const response = await AssetFinder.delete(`/${id}`)
       setDatas(
         datas.filter((data) => {
           return data.id !== id
         })
       )
-      console.log(response)
-      // setOpenDelModal(false);
-      // setOpenSnackDel(true);
     } catch (err) {
       console.log(err)
     }
@@ -168,11 +162,10 @@ const Networth: React.FC = () => {
         name: formData.name,
         value: formData.value,
         base_value: formData.base_value,
-        goal_ultimate_id: formData.goal_ultimate_id,
-        type: formData.type,
+        value_mode: formData.value_mode,
+        networth_id: formData.networth_id || null,
       }
-      const response = await NetworthFinder.put(`/`, body)
-      console.log(response)
+      const response = await AssetFinder.put(`/`, body)
       setDatas([])
       fetchData()
     } catch (error) {
@@ -183,11 +176,10 @@ const Networth: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const response = await NetworthFinder.get('/')
-      console.log(response.data)
-      const networthData = response.data.data.networth
-      if (networthData.length > 0) {
-        const sortedData = networthData.sort((a: FormData, b: FormData) =>
+      const response = await AssetFinder.get('/')
+      const assetData = response.data.data.asset
+      if (assetData.length > 0) {
+        const sortedData = assetData.sort((a: FormData, b: FormData) =>
           a.name.localeCompare(b.name)
         )
         setDatas(sortedData)
@@ -196,11 +188,10 @@ const Networth: React.FC = () => {
       console.log(error)
     }
     try {
-      const response = await Goal_UltimateFinder.get('/')
-      console.log(response.data)
-      const goalData = response.data.data.goal_ultimate
-      if (goalData.length > 0) {
-        setGoalUltimateDatas(response.data.data.goal_ultimate)
+      const response = await NetworthFinder.get('/')
+      const nwData = response.data.data.networth
+      if (nwData.length > 0) {
+        setNetworthDatas(nwData)
       }
     } catch (error) {
       console.log(error)
@@ -211,47 +202,58 @@ const Networth: React.FC = () => {
     fetchData()
   }, [])
 
-  const goalMap = useMemo(() => {
+  const networthMap = useMemo(() => {
     const map: Record<number, string> = {}
-    goalUltimateDatas.forEach((goal) => {
-      map[goal.id] = goal.name
+    networthDatas.forEach((nw) => {
+      map[nw.id] = nw.name
     })
     return map
-  }, [goalUltimateDatas])
+  }, [networthDatas])
+
+  const networthValueMap = useMemo(() => {
+    const map: Record<number, number> = {}
+    networthDatas.forEach((nw) => {
+      map[nw.id] = nw.value
+    })
+    return map
+  }, [networthDatas])
 
   const fmtRM = (v: number) =>
     `RM ${Number(v).toLocaleString('en-MY', { minimumFractionDigits: 2 })}`
+
+  const fmtUnit = (v: number) =>
+    `${Number(v).toLocaleString('en-MY', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} unit${v !== 1 ? 's' : ''}`
+
+  const fmtValue = (v: number, mode: string) =>
+    mode === 'unit' ? fmtUnit(v) : fmtRM(v)
+
 
   return (
     <>
       {datas.length === 0 ? (
         <div className='flex-1 h-full flex flex-col items-center justify-center'>
           <div className='w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4'>
-            <BanknotesIcon className='h-8 w-8 text-gray-300' />
+            <CubeIcon className='h-8 w-8 text-gray-300' />
           </div>
-          <p className='text-gray-400 text-lg mb-1'>No networth data yet</p>
+          <p className='text-gray-400 text-lg mb-1'>No asset data yet</p>
           <p className='text-gray-300 text-sm mb-6'>Add your first asset to get started</p>
           <button
             onClick={openModal}
             className='inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2.5 px-5 rounded-xl transition-colors shadow-sm'>
             <PlusIcon className='h-4 w-4' />
-            Add Networth
+            Add Asset
           </button>
         </div>
       ) : (
       <div className='overflow-auto flex flex-col flex-1'>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
           {datas.map((data) => {
-            const gain = data.value - data.base_value
-            const isGain = gain >= 0
-            const pct = data.base_value > 0 ? ((data.value / data.base_value) * 100) : 0
+            const currentValue = data.networth_id
+              ? (networthValueMap[data.networth_id] ?? data.value)
+              : data.value
+            const remaining = data.base_value - currentValue
+            const pct = data.base_value > 0 ? ((currentValue / data.base_value) * 100) : 0
             const progressWidth = Math.min(pct, 100)
-            const typeLabel: Record<string, string> = { saving: 'Saving', invest: 'Investment', trading: 'Trading' }
-            const typeColor: Record<string, string> = {
-              saving: 'bg-blue-50 text-blue-600',
-              invest: 'bg-violet-50 text-violet-600',
-              trading: 'bg-amber-50 text-amber-600',
-            }
 
             return (
               <div
@@ -267,42 +269,34 @@ const Networth: React.FC = () => {
                     </div>
                     <div className='min-w-0'>
                       <h2 className='text-base font-semibold text-gray-800 truncate'>{data.name}</h2>
-                      {goalMap[data.goal_ultimate_id ?? 0] && (
-                        <p className='text-xs text-gray-400 truncate'>
-                          {goalMap[data.goal_ultimate_id ?? 0]}
+                      {networthMap[data.networth_id ?? 0] && (
+                        <p className='text-xs text-indigo-500 truncate'>
+                          Linked: {networthMap[data.networth_id ?? 0]}
                         </p>
                       )}
                     </div>
                   </div>
-                  {data.type && data.type !== 'Select' && (
-                    <span
-                      className={`text-xs font-medium px-2.5 py-1 rounded-full shrink-0 ${
-                        typeColor[data.type] || 'bg-gray-100 text-gray-500'
-                      }`}>
-                      {typeLabel[data.type] || data.type}
-                    </span>
-                  )}
                 </div>
 
-                {/* Current Value */}
+                {/* Target */}
                 <div className='px-5 pb-2'>
-                  <p className='text-xs text-gray-400 uppercase tracking-wider mb-1'>Current Value</p>
-                  <p className='text-2xl font-bold text-gray-900'>{fmtRM(data.value)}</p>
+                  <p className='text-xs text-gray-400 uppercase tracking-wider mb-1'>Target</p>
+                  <p className='text-2xl font-bold text-gray-900'>{fmtValue(data.base_value, data.value_mode)}</p>
                 </div>
 
-                {/* Base Value & Gain/Loss */}
+                {/* Current & Remaining */}
                 <div className='px-5 pb-2 flex items-center gap-4'>
                   <div className='flex-1 min-w-0'>
-                    <p className='text-xs text-gray-400'>Base Value</p>
-                    <p className='text-sm font-medium text-gray-600 truncate'>{fmtRM(data.base_value)}</p>
+                    <p className='text-xs text-gray-400'>Current</p>
+                    <p className='text-sm font-medium text-gray-600 truncate'>{fmtValue(currentValue, data.value_mode)}</p>
                   </div>
                   <div className='flex-1 min-w-0'>
-                    <p className='text-xs text-gray-400'>Gain / Loss</p>
+                    <p className='text-xs text-gray-400'>Remaining</p>
                     <p
                       className={`text-sm font-semibold truncate ${
-                        isGain ? 'text-emerald-600' : 'text-red-500'
+                        remaining <= 0 ? 'text-emerald-600' : 'text-gray-600'
                       }`}>
-                      {isGain ? '+' : '-'} {fmtRM(Math.abs(gain))}
+                      {fmtValue(Math.max(remaining, 0), data.value_mode)}
                     </p>
                   </div>
                 </div>
@@ -333,8 +327,8 @@ const Networth: React.FC = () => {
                         data.name,
                         data.value,
                         data.base_value,
-                        data.goal_ultimate_id,
-                        data.type
+                        data.value_mode,
+                        data.networth_id
                       )
                     }>
                     <PencilSquareIcon className='h-4 w-4' />
@@ -356,7 +350,7 @@ const Networth: React.FC = () => {
             className='rounded-xl p-6 flex flex-col border border-dashed border-gray-200 items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-colors'
             onClick={openModal}>
             <PlusIcon className='h-8 w-8 text-gray-300' />
-            <span className='text-sm text-gray-400 mt-2'>Add Networth</span>
+            <span className='text-sm text-gray-400 mt-2'>Add Asset</span>
           </div>
         </div>
       </div>
@@ -392,12 +386,12 @@ const Networth: React.FC = () => {
           </div>
         </ModalPortal>
       )}
-      {/* Modal for update networth*/}
+      {/* Modal for update asset*/}
       {isUpdateOpen && (
         <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4'>
           <div className='bg-white rounded-2xl shadow-2xl w-full max-w-md'>
             <div className='flex items-center justify-between px-6 pt-6 pb-2'>
-              <h2 className='text-lg font-bold text-gray-900'>Update Networth</h2>
+              <h2 className='text-lg font-bold text-gray-900'>Update Asset</h2>
               <button
                 onClick={closeUpdateModal}
                 className='w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors'>
@@ -427,67 +421,89 @@ const Networth: React.FC = () => {
                   )}
                 </div>
 
-                <div className='grid grid-cols-2 gap-3'>
-                  <div>
-                    <label htmlFor='value' className='block text-sm font-medium text-gray-600 mb-1.5'>Value (RM)</label>
-                    <input
-                      type='number'
-                      id='value'
-                      name='value'
-                      min={0}
-                      value={formData.value}
-                      onChange={handleChange}
-                      className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'
-                      placeholder='0.00'
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor='base_value' className='block text-sm font-medium text-gray-600 mb-1.5'>Base Value (RM)</label>
-                    <input
-                      type='number'
-                      id='base_value'
-                      name='base_value'
-                      min={0}
-                      value={formData.base_value}
-                      onChange={handleChange}
-                      className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'
-                      placeholder='0.00'
-                    />
+                <div>
+                  <label className='block text-sm font-medium text-gray-600 mb-1.5'>Value Mode</label>
+                  <div className='flex rounded-xl overflow-hidden border border-gray-200'>
+                    <button
+                      type='button'
+                      onClick={() => setFormData((prev) => ({ ...prev, value_mode: 'rm' }))}
+                      className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                        formData.value_mode === 'rm'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                      }`}>
+                      RM
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => setFormData((prev) => ({ ...prev, value_mode: 'unit', networth_id: 0 }))}
+                      className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                        formData.value_mode === 'unit'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                      }`}>
+                      Unit
+                    </button>
                   </div>
                 </div>
 
                 <div className='grid grid-cols-2 gap-3'>
                   <div>
-                    <label htmlFor='type' className='block text-sm font-medium text-gray-600 mb-1.5'>Type</label>
-                    <select
-                      id='type'
-                      name='type'
-                      value={formData.type || ''}
+                    <label htmlFor='value' className='block text-sm font-medium text-gray-600 mb-1.5'>
+                      Value {formData.value_mode === 'rm' ? '(RM)' : '(Units)'}
+                    </label>
+                    <input
+                      type='number'
+                      id='value'
+                      name='value'
+                      min={0}
+                      step={formData.value_mode === 'unit' ? '0.01' : 'any'}
+                      value={formData.value}
                       onChange={handleChange}
-                      className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'>
-                      <option value=''>Select</option>
-                      <option value='saving'>Saving</option>
-                      <option value='invest'>Investment</option>
-                      <option value='trading'>Trading</option>
-                    </select>
+                      disabled={!!formData.networth_id}
+                      className={`w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors ${formData.networth_id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      placeholder={formData.value_mode === 'rm' ? '0.00' : '0'}
+                    />
+                    {!!formData.networth_id && (
+                      <p className='text-xs text-indigo-500 mt-1'>Linked to networth</p>
+                    )}
                   </div>
                   <div>
-                    <label htmlFor='goal_ultimate_id' className='block text-sm font-medium text-gray-600 mb-1.5'>Goal</label>
-                    <select
-                      id='goal_ultimate_id'
-                      name='goal_ultimate_id'
-                      value={formData.goal_ultimate_id?.toString() || ''}
+                    <label htmlFor='base_value' className='block text-sm font-medium text-gray-600 mb-1.5'>
+                      Target {formData.value_mode === 'rm' ? '(RM)' : '(Units)'}
+                    </label>
+                    <input
+                      type='number'
+                      id='base_value'
+                      name='base_value'
+                      min={0}
+                      step={formData.value_mode === 'unit' ? '0.01' : 'any'}
+                      value={formData.base_value}
                       onChange={handleChange}
-                      className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'>
-                      <option value=''>Select Goal</option>
-                      {goalUltimateDatas.map((goal) => (
-                        <option key={goal.id} value={goal.id.toString()}>
-                          {goal.name}
-                        </option>
-                      ))}
-                    </select>
+                      className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'
+                      placeholder={formData.value_mode === 'rm' ? '0.00' : '0'}
+                    />
                   </div>
                 </div>
+
+                {formData.value_mode === 'rm' && (
+                <div>
+                  <label htmlFor='networth_id' className='block text-sm font-medium text-gray-600 mb-1.5'>Link to Networth</label>
+                  <select
+                    id='networth_id'
+                    name='networth_id'
+                    value={formData.networth_id?.toString() || ''}
+                    onChange={handleChange}
+                    className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'>
+                    <option value=''>None</option>
+                    {networthDatas.map((nw) => (
+                      <option key={nw.id} value={nw.id.toString()}>
+                        {nw.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                )}
               </div>
 
               <div className='flex gap-3'>
@@ -507,12 +523,12 @@ const Networth: React.FC = () => {
           </div>
         </div>
       )}
-      {/* Modal for add networth*/}
+      {/* Modal for add asset*/}
       {isOpen && (
         <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4'>
           <div className='bg-white rounded-2xl shadow-2xl w-full max-w-md'>
             <div className='flex items-center justify-between px-6 pt-6 pb-2'>
-              <h2 className='text-lg font-bold text-gray-900'>Add Networth</h2>
+              <h2 className='text-lg font-bold text-gray-900'>Add Asset</h2>
               <button
                 onClick={closeModal}
                 className='w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors'>
@@ -542,67 +558,89 @@ const Networth: React.FC = () => {
                   )}
                 </div>
 
-                <div className='grid grid-cols-2 gap-3'>
-                  <div>
-                    <label htmlFor='value' className='block text-sm font-medium text-gray-600 mb-1.5'>Value (RM)</label>
-                    <input
-                      type='number'
-                      id='value'
-                      name='value'
-                      min={0}
-                      value={formData.value}
-                      onChange={handleChange}
-                      className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'
-                      placeholder='0.00'
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor='base_value' className='block text-sm font-medium text-gray-600 mb-1.5'>Base Value (RM)</label>
-                    <input
-                      type='number'
-                      id='base_value'
-                      name='base_value'
-                      min={0}
-                      value={formData.base_value}
-                      onChange={handleChange}
-                      className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'
-                      placeholder='0.00'
-                    />
+                <div>
+                  <label className='block text-sm font-medium text-gray-600 mb-1.5'>Value Mode</label>
+                  <div className='flex rounded-xl overflow-hidden border border-gray-200'>
+                    <button
+                      type='button'
+                      onClick={() => setFormData((prev) => ({ ...prev, value_mode: 'rm' }))}
+                      className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                        formData.value_mode === 'rm'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                      }`}>
+                      RM
+                    </button>
+                    <button
+                      type='button'
+                      onClick={() => setFormData((prev) => ({ ...prev, value_mode: 'unit', networth_id: 0 }))}
+                      className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                        formData.value_mode === 'unit'
+                          ? 'bg-indigo-600 text-white'
+                          : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                      }`}>
+                      Unit
+                    </button>
                   </div>
                 </div>
 
                 <div className='grid grid-cols-2 gap-3'>
                   <div>
-                    <label htmlFor='type' className='block text-sm font-medium text-gray-600 mb-1.5'>Type</label>
-                    <select
-                      id='type'
-                      name='type'
-                      value={formData.type || ''}
+                    <label htmlFor='value' className='block text-sm font-medium text-gray-600 mb-1.5'>
+                      Value {formData.value_mode === 'rm' ? '(RM)' : '(Units)'}
+                    </label>
+                    <input
+                      type='number'
+                      id='value'
+                      name='value'
+                      min={0}
+                      step={formData.value_mode === 'unit' ? '0.01' : 'any'}
+                      value={formData.value}
                       onChange={handleChange}
-                      className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'>
-                      <option value=''>Select</option>
-                      <option value='saving'>Saving</option>
-                      <option value='invest'>Investment</option>
-                      <option value='trading'>Trading</option>
-                    </select>
+                      disabled={!!formData.networth_id}
+                      className={`w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors ${formData.networth_id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      placeholder={formData.value_mode === 'rm' ? '0.00' : '0'}
+                    />
+                    {!!formData.networth_id && (
+                      <p className='text-xs text-indigo-500 mt-1'>Linked to networth</p>
+                    )}
                   </div>
                   <div>
-                    <label htmlFor='goal_ultimate_id' className='block text-sm font-medium text-gray-600 mb-1.5'>Goal</label>
-                    <select
-                      id='goal_ultimate_id'
-                      name='goal_ultimate_id'
-                      value={formData.goal_ultimate_id?.toString() || ''}
+                    <label htmlFor='base_value' className='block text-sm font-medium text-gray-600 mb-1.5'>
+                      Target {formData.value_mode === 'rm' ? '(RM)' : '(Units)'}
+                    </label>
+                    <input
+                      type='number'
+                      id='base_value'
+                      name='base_value'
+                      min={0}
+                      step={formData.value_mode === 'unit' ? '0.01' : 'any'}
+                      value={formData.base_value}
                       onChange={handleChange}
-                      className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'>
-                      <option value=''>Select Goal</option>
-                      {goalUltimateDatas.map((goal) => (
-                        <option key={goal.id} value={goal.id.toString()}>
-                          {goal.name}
-                        </option>
-                      ))}
-                    </select>
+                      className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'
+                      placeholder={formData.value_mode === 'rm' ? '0.00' : '0'}
+                    />
                   </div>
                 </div>
+
+                {formData.value_mode === 'rm' && (
+                <div>
+                  <label htmlFor='networth_id' className='block text-sm font-medium text-gray-600 mb-1.5'>Link to Networth</label>
+                  <select
+                    id='networth_id'
+                    name='networth_id'
+                    value={formData.networth_id?.toString() || ''}
+                    onChange={handleChange}
+                    className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'>
+                    <option value=''>None</option>
+                    {networthDatas.map((nw) => (
+                      <option key={nw.id} value={nw.id.toString()}>
+                        {nw.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                )}
               </div>
 
               <div className='flex gap-3'>
@@ -626,4 +664,4 @@ const Networth: React.FC = () => {
   )
 }
 
-export default Networth
+export default Asset
