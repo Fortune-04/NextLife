@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode } from 'react'
+import { useState, useEffect } from 'react'
 
 import {
   AlertDialog,
@@ -26,7 +26,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Label,
 } from 'recharts'
 
 //API finder
@@ -35,9 +34,6 @@ import Networth_TimeFinder from '../Apis/Networth_TimeFinder'
 import Trading_TimeFinder from '@/Apis/Trading_TimeFinder'
 import Investment_TimeFinder from '@/Apis/Investment_TimeFinder'
 
-//Import subcomponents
-import InvestmentProfit from './SubComponents/InvestmentProfit'
-import BusinessProfit from './SubComponents/BusinessProfit'
 import Business_TimeFinder from '@/Apis/Business_TimeFinder'
 
 interface Data {
@@ -178,10 +174,11 @@ const Dashboard = () => {
     fetchData()
   }, [])
 
-  const processedData = datas.map((item) => ({
+  const processedData = datas.map((item, index) => ({
     // Extracting date
     date: new Date(item.date).toLocaleDateString(),
     value: item.total_networth,
+    increment: index > 0 ? item.total_networth - datas[index - 1].total_networth : 0,
   }))
 
   const fmtRM = (v: number) =>
@@ -317,7 +314,7 @@ const Dashboard = () => {
         ) : (
           <>
             <div className='text-center mb-4'>
-              <h2 className='text-base font-semibold text-gray-800' style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}>
+              <h2 className='text-base font-semibold text-gray-800 font-serif'>
                 Networth Over Time
               </h2>
               <span className='text-xs text-gray-400'>
@@ -343,16 +340,22 @@ const Dashboard = () => {
                     tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
                   />
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: '#fff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                      padding: '10px 14px',
-                      fontSize: '13px',
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload || !payload.length) return null
+                      const data = payload[0].payload
+                      const inc = data.increment
+                      return (
+                        <div className='bg-white border border-gray-200 rounded-xl shadow-md px-3.5 py-2.5 text-sm'>
+                          <p className='text-gray-400 text-xs mb-1'>{label}</p>
+                          <p className='text-gray-900 font-semibold'>{fmtRM(data.value)}</p>
+                          {inc !== 0 && (
+                            <p className={`text-xs mt-0.5 ${inc > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                              {inc > 0 ? '+' : ''}{fmtRM(inc)}
+                            </p>
+                          )}
+                        </div>
+                      )
                     }}
-                    formatter={(value: number) => [fmtRM(value), 'Networth']}
-                    labelStyle={{ color: '#94a3b8', fontSize: '12px', marginBottom: '4px' }}
                   />
                   <Line
                     type='monotone'

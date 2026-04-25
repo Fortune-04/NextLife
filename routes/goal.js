@@ -118,6 +118,24 @@ router.post("/other", (req, res, next) => {
   }
 });
 
+//UPDATE a Goal_Other (mark as complete)
+router.put("/other/:id", (req, res, next) => {
+  try {
+    const { complete_status } = req.body;
+    db.prepare(
+      "UPDATE goal_other SET complete_status=? WHERE id=?"
+    ).run(complete_status ? 1 : 0, req.params.id);
+    const row = db.prepare("SELECT * FROM goal_other WHERE id = ?").get(req.params.id);
+    res.status(200).json({
+      status: "success",
+      data: { goal_other: row },
+    });
+    console.log("API Called : Update a goal_other");
+  } catch (error) {
+    next(error);
+  }
+});
+
 //DELETE a goal_other
 router.delete("/other/:id", (req, res, next) => {
   try {

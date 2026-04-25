@@ -10,8 +10,6 @@ import Trading from './Components/Trading'
 import Asset from './Components/Asset'
 import Settings from './Components/Settings'
 
-import './App.css'
-
 function App() {
   return (
     <>

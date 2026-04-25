@@ -260,16 +260,25 @@ const Goal: React.FC = () => {
     setDeleteId(null)
   }
 
+  const handleCompleteGoalOther = async (id: number) => {
+    try {
+      await Goal_OtherFinder.put(`/${id}`, { complete_status: true })
+      setGoalOtherDatas(
+        goalOtherDatas.map((data) =>
+          data.id === id ? { ...data, complete_status: 1 } : data
+        )
+      )
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   const handleDeleteGoalOther = async (id: number) => {
     try {
-      const response = await Goal_OtherFinder.delete(`/${id}`)
+      await Goal_OtherFinder.delete(`/${id}`)
       setGoalOtherDatas(
-        goalOtherDatas.filter((data) => {
-          return data.id !== id
-        })
+        goalOtherDatas.filter((data) => data.id !== id)
       )
-      // setOpenDelModal(false);
-      // setOpenSnackDel(true);
     } catch (err) {
       console.log(err)
     }
@@ -520,68 +529,71 @@ const Goal: React.FC = () => {
         <div
           id='tab2'
           className={`tab-content ${activeTab === '#tab2' ? '' : 'hidden'}`}>
+          {/* Active Goals */}
           <div className='space-y-2'>
             {goalOtherDatas &&
-              goalOtherDatas.map((data, index) => (
-                <div
-                  key={data.id}
-                  className='flex items-center gap-3 bg-white rounded-xl px-4 py-3.5 border border-gray-100 shadow-sm hover:shadow-md transition-all group'>
-                  <span className='w-6 h-6 rounded-md bg-indigo-50 text-indigo-500 text-xs font-bold flex items-center justify-center flex-shrink-0'>
-                    {index + 1}
-                  </span>
-                  <span className='flex-1 text-sm font-medium text-gray-800 leading-snug'>
-                    {data.name}
-                  </span>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button
-                        className='w-7 h-7 rounded-full flex items-center justify-center text-emerald-500 hover:bg-emerald-50 transition-colors opacity-0 group-hover:opacity-100'
-                        title='Mark as done'>
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          className='h-4.5 w-4.5'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          stroke='currentColor'
-                          strokeWidth={2.5}>
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            d='M5 13l4 4L19 7'
-                          />
-                        </svg>
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className='sm:rounded-2xl p-0 gap-0 max-w-sm border-0 shadow-2xl'>
-                      <div className='flex flex-col items-center text-center px-6 pt-8 pb-4'>
-                        <div className='w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4'>
-                          <svg xmlns='http://www.w3.org/2000/svg' className='h-7 w-7 text-emerald-500' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={1.5}>
-                            <path strokeLinecap='round' strokeLinejoin='round' d='M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' />
+              goalOtherDatas
+                .filter((data) => !data.complete_status)
+                .map((data, index) => (
+                  <div
+                    key={data.id}
+                    className='flex items-center gap-3 bg-white rounded-xl px-4 py-3.5 border border-gray-100 shadow-sm hover:shadow-md transition-all group'>
+                    <span className='w-6 h-6 rounded-md bg-indigo-50 text-indigo-500 text-xs font-bold flex items-center justify-center flex-shrink-0'>
+                      {index + 1}
+                    </span>
+                    <span className='flex-1 text-sm font-medium text-gray-800 leading-snug'>
+                      {data.name}
+                    </span>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button
+                          className='w-7 h-7 rounded-full flex items-center justify-center text-emerald-500 hover:bg-emerald-50 transition-colors opacity-0 group-hover:opacity-100'
+                          title='Mark as done'>
+                          <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            className='h-4.5 w-4.5'
+                            fill='none'
+                            viewBox='0 0 24 24'
+                            stroke='currentColor'
+                            strokeWidth={2.5}>
+                            <path
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              d='M5 13l4 4L19 7'
+                            />
                           </svg>
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className='sm:rounded-2xl p-0 gap-0 max-w-sm border-0 shadow-2xl'>
+                        <div className='flex flex-col items-center text-center px-6 pt-8 pb-4'>
+                          <div className='w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4'>
+                            <svg xmlns='http://www.w3.org/2000/svg' className='h-7 w-7 text-emerald-500' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={1.5}>
+                              <path strokeLinecap='round' strokeLinejoin='round' d='M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' />
+                            </svg>
+                          </div>
+                          <AlertDialogHeader className='space-y-1.5'>
+                            <AlertDialogTitle className='text-lg font-bold text-gray-900'>
+                              Complete this goal?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription className='text-sm text-gray-500 leading-relaxed'>
+                              "{data.name}" will be marked as done.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
                         </div>
-                        <AlertDialogHeader className='space-y-1.5'>
-                          <AlertDialogTitle className='text-lg font-bold text-gray-900'>
-                            Complete this goal?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription className='text-sm text-gray-500 leading-relaxed'>
-                            "{data.name}" will be marked as done and removed from your list.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                      </div>
-                      <div className='border-t border-gray-100 px-6 py-4 flex gap-3'>
-                        <AlertDialogAction
-                          onClick={() => handleDeleteGoalOther(data.id)}
-                          className='flex-1 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium shadow-sm border-0'>
-                          Yes, complete
-                        </AlertDialogAction>
-                        <AlertDialogCancel className='flex-1 rounded-xl border-gray-200 hover:bg-gray-50 font-medium'>
-                          Cancel
-                        </AlertDialogCancel>
-                      </div>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              ))}
+                        <div className='border-t border-gray-100 px-6 py-4 flex gap-3'>
+                          <AlertDialogAction
+                            onClick={() => handleCompleteGoalOther(data.id)}
+                            className='flex-1 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium shadow-sm border-0'>
+                            Yes, complete
+                          </AlertDialogAction>
+                          <AlertDialogCancel className='flex-1 rounded-xl border-gray-200 hover:bg-gray-50 font-medium'>
+                            Cancel
+                          </AlertDialogCancel>
+                        </div>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                ))}
 
             {/* Add Other Goal */}
             <button
@@ -591,6 +603,71 @@ const Goal: React.FC = () => {
               <span className='text-sm font-medium text-indigo-400'>Add a new goal</span>
             </button>
           </div>
+
+          {/* Completed Goals */}
+          {goalOtherDatas && goalOtherDatas.filter((data) => data.complete_status).length > 0 && (
+            <div className='mt-8'>
+              <h3 className='text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3'>
+                Completed ({goalOtherDatas.filter((data) => data.complete_status).length})
+              </h3>
+              <div className='space-y-2'>
+                {goalOtherDatas
+                  .filter((data) => data.complete_status)
+                  .map((data) => (
+                    <div
+                      key={data.id}
+                      className='flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3.5 border border-gray-100 group'>
+                      <span className='w-6 h-6 rounded-md bg-emerald-50 text-emerald-500 flex items-center justify-center flex-shrink-0'>
+                        <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2.5}>
+                          <path strokeLinecap='round' strokeLinejoin='round' d='M5 13l4 4L19 7' />
+                        </svg>
+                      </span>
+                      <span className='flex-1 text-sm font-medium text-gray-400 line-through leading-snug'>
+                        {data.name}
+                      </span>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <button
+                            className='w-7 h-7 rounded-full flex items-center justify-center text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100'
+                            title='Delete'>
+                            <svg xmlns='http://www.w3.org/2000/svg' className='h-4 w-4' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
+                              <path strokeLinecap='round' strokeLinejoin='round' d='m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0' />
+                            </svg>
+                          </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className='sm:rounded-2xl p-0 gap-0 max-w-sm border-0 shadow-2xl'>
+                          <div className='flex flex-col items-center text-center px-6 pt-8 pb-4'>
+                            <div className='w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4'>
+                              <svg xmlns='http://www.w3.org/2000/svg' className='h-7 w-7 text-red-500' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={1.5}>
+                                <path strokeLinecap='round' strokeLinejoin='round' d='m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0' />
+                              </svg>
+                            </div>
+                            <AlertDialogHeader className='space-y-1.5'>
+                              <AlertDialogTitle className='text-lg font-bold text-gray-900'>
+                                Delete this goal?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className='text-sm text-gray-500 leading-relaxed'>
+                                "{data.name}" will be permanently removed.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                          </div>
+                          <div className='border-t border-gray-100 px-6 py-4 flex gap-3'>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteGoalOther(data.id)}
+                              className='flex-1 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium shadow-sm border-0'>
+                              Delete
+                            </AlertDialogAction>
+                            <AlertDialogCancel className='flex-1 rounded-xl border-gray-200 hover:bg-gray-50 font-medium'>
+                              Cancel
+                            </AlertDialogCancel>
+                          </div>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

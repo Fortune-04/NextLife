@@ -3,7 +3,8 @@ import ModalPortal from './SubComponents/ModalPortal'
 
 //API finder
 import AssetFinder from '../Apis/AssetFinder'
-import { NetworthFinder } from '../Apis/api'
+import NetworthFinder from '../Apis/NetworthFinder'
+import Goal_UltimateFinder from '../Apis/Goal_UltimateFinder'
 
 //Import icon
 import { PlusIcon, CubeIcon, TrashIcon, PencilSquareIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
@@ -22,7 +23,13 @@ interface NetworthData {
   name: string
   value: number
   base_value: number
+  goal_ultimate_id?: number
   type: string
+}
+
+interface GoalUltimateData {
+  id: number
+  name: string
 }
 
 
@@ -30,6 +37,7 @@ const Asset: React.FC = () => {
   //Temporary data
   const [datas, setDatas] = useState<FormData[]>([])
   const [networthDatas, setNetworthDatas] = useState<NetworthData[]>([])
+  const [goalUltimateDatas, setGoalUltimateDatas] = useState<GoalUltimateData[]>([])
   //Modal
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
@@ -196,6 +204,15 @@ const Asset: React.FC = () => {
     } catch (error) {
       console.log(error)
     }
+    try {
+      const response = await Goal_UltimateFinder.get('/')
+      const goalData = response.data.data.goal_ultimate
+      if (goalData.length > 0) {
+        setGoalUltimateDatas(goalData)
+      }
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   useEffect(() => {
@@ -209,6 +226,14 @@ const Asset: React.FC = () => {
     })
     return map
   }, [networthDatas])
+
+  const goalMap = useMemo(() => {
+    const map: Record<number, string> = {}
+    goalUltimateDatas.forEach((g) => {
+      map[g.id] = g.name
+    })
+    return map
+  }, [goalUltimateDatas])
 
   const networthValueMap = useMemo(() => {
     const map: Record<number, number> = {}
@@ -274,6 +299,7 @@ const Asset: React.FC = () => {
                           Linked: {networthMap[data.networth_id ?? 0]}
                         </p>
                       )}
+                      {(() => { const nw = networthDatas.find(n => n.id === data.networth_id); return nw?.goal_ultimate_id && goalMap[nw.goal_ultimate_id] ? <p className='text-xs text-gray-300 italic truncate'>{goalMap[nw.goal_ultimate_id]}</p> : null })()}
                     </div>
                   </div>
                 </div>
@@ -498,7 +524,7 @@ const Asset: React.FC = () => {
                     <option value=''>None</option>
                     {networthDatas.map((nw) => (
                       <option key={nw.id} value={nw.id.toString()}>
-                        {nw.name}
+                        {nw.name}{nw.goal_ultimate_id && goalMap[nw.goal_ultimate_id] ? ` → ${goalMap[nw.goal_ultimate_id]}` : ''}
                       </option>
                     ))}
                   </select>
@@ -635,7 +661,7 @@ const Asset: React.FC = () => {
                     <option value=''>None</option>
                     {networthDatas.map((nw) => (
                       <option key={nw.id} value={nw.id.toString()}>
-                        {nw.name}
+                        {nw.name}{nw.goal_ultimate_id && goalMap[nw.goal_ultimate_id] ? ` → ${goalMap[nw.goal_ultimate_id]}` : ''}
                       </option>
                     ))}
                   </select>
