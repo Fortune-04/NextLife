@@ -4,7 +4,7 @@
 
   @layer base {
     :root {
-      --background: 220 14% 96%;
+      --background: 0 0% 100%;
       --foreground: 222.2 84% 4.9%;
 
       --card: 0 0% 100%;
@@ -73,24 +73,6 @@
     body {
       @apply bg-background text-foreground;
     }
-  }
-
-  /* Hide scrollbar but keep scroll */
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  .titlebar {
-    height: 32px;
-    -webkit-app-region: drag;
-  }
-
-  .titlebar-btn {
-    -webkit-app-region: no-drag;
   }
 
   .carousel-button {

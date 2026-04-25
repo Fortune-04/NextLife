@@ -69,9 +69,5 @@ export const columns: ColumnDef<Data>[] = [
         </Button>
       )
     },
-    cell: ({ row }) => {
-      const value = row.getValue('profit_percentage') as number
-      return isNaN(value) || value === null || value === undefined ? 0 : value
-    },
   },
 ]

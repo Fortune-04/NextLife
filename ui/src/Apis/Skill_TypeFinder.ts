@@ -1,5 +1,5 @@
 import axios from 'axios'
 
 export default axios.create({
-  baseURL: 'http://localhost:4001/skill/type',
+  baseURL: 'http://localhost:4000/skill/type',
 })

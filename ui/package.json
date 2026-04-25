@@ -1,13 +1,10 @@
 {
-  "name": "nextlife",
+  "name": "ui",
   "private": true,
-  "version": "2.2.1",
-  "description": "NextLife - Aim for the future",
-  "author": "Fortune04",
+  "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "build:installer": "tsc && vite build && electron-builder --win",
+    "build": "tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -24,14 +21,12 @@
     "lucide-react": "^0.379.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-image-crop": "^11.0.10",
     "react-router-dom": "^6.22.3",
     "recharts": "^2.12.4",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "@electron/rebuild": "^4.0.3",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
@@ -51,73 +46,5 @@
     "vite-plugin-electron": "^0.28.4",
     "vite-plugin-electron-renderer": "^0.14.5"
   },
-  "main": "dist-electron/main.js",
-  "build": {
-    "appId": "com.nextlife.app",
-    "productName": "NextLife",
-    "asar": false,
-    "directories": {
-      "output": "installer/${version}"
-    },
-    "files": [
-      "dist/**/*",
-      "dist-electron/**/*"
-    ],
-    "extraResources": [
-      {
-        "from": "../server.js",
-        "to": "backend/server.js"
-      },
-      {
-        "from": "../routes",
-        "to": "backend/routes",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "../db",
-        "to": "backend/db",
-        "filter": [
-          "**/*"
-        ]
-      },
-      {
-        "from": "../node_modules",
-        "to": "backend/node_modules",
-        "filter": [
-          "**/*",
-          "!better-sqlite3/**"
-        ]
-      },
-      {
-        "from": "node_modules/better-sqlite3",
-        "to": "backend/node_modules/better-sqlite3",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ],
-    "win": {
-      "icon": "build/icon.png",
-      "target": [
-        {
-          "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "NextLife"
-    }
-  },
-  "optionalDependencies": {
-    "better-sqlite3": "^12.9.0"
-  }
+  "main": "dist-electron/main.js"
 }

@@ -140,7 +140,7 @@ const Skill: React.FC = () => {
             </button>
             {/* Form Content */}
             <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
-              <div className='bg-white p-6 rounded-lg shadow-xl w-[90vw] max-w-96'>
+              <div className='bg-white p-6 rounded-lg shadow-xl w-96'>
                 <button
                   // onClick={onClose}
                   className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>

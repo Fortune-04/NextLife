@@ -5,14 +5,13 @@ import { PlusCircleIcon } from '@heroicons/react/24/outline'
 
 //Import components
 import CurrentValueCalculation from '../Components/SubComponents/CurrentValueCalculation'
-import ImageCropper from '../Components/SubComponents/ImageCropper'
 
 //API Finder
 import Goal_UltimateFinder from '../Apis/Goal_UltimateFinder'
 import Goal_OtherFinder from '../Apis/Goal_OtherFinder'
 import NetworthFinder from '@/Apis/NetworthFinder'
 
-import CloudImage from '../assets/Cloud.jpeg'
+import CustomAlert from '../Components/ui/custom-alert'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,7 +57,8 @@ const Goal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
 
-  const [nameError, setNameError] = useState('')
+  const [alertMessage, setAlertMessage] = useState<string>('')
+  const [showAlert, setShowAlert] = useState<boolean>(false)
 
   //FormData
   const [goalOther, setGoalOther] = useState('')
@@ -74,7 +74,6 @@ const Goal: React.FC = () => {
   const handleChangeGoalOther = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
-    setNameError('')
     // Update the state with the new value entered by the user
     setGoalOther(event.target.value)
   }
@@ -83,7 +82,6 @@ const Goal: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
-    if (name === 'name') setNameError('')
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: value,
@@ -95,7 +93,6 @@ const Goal: React.FC = () => {
   }
 
   const closeUltimateModal = () => {
-    setNameError('')
     setFormData({
       ...formData,
       id: 0,
@@ -113,7 +110,6 @@ const Goal: React.FC = () => {
   }
 
   const closeOtherModal = () => {
-    setNameError('')
     setGoalOther('')
     setIsOpen(false)
   }
@@ -139,7 +135,6 @@ const Goal: React.FC = () => {
   }
 
   const closeUpdateModal = () => {
-    setNameError('')
     setFormData({
       ...formData,
       id: 0,
@@ -185,16 +180,11 @@ const Goal: React.FC = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault()
-    if (!formData.name.trim()) {
-      setNameError('Goal name is required')
-      return
-    }
     try {
       const body = {
         id: formData.id,
         name: formData.name,
         target_value: formData.target_value,
-        image_source: formData.image_source || null,
         status: false,
       }
       const response = await Goal_UltimateFinder.put(`/target`, body)
@@ -207,15 +197,20 @@ const Goal: React.FC = () => {
 
   const handleSubmitGoalUltimate = async (e) => {
     e.preventDefault()
-    if (!formData.name.trim()) {
-      setNameError('Goal name is required')
+    if (!formData.name) {
+      setAlertMessage('Name Cannot Be Empty')
+      setShowAlert(true)
+      return
+    }
+    if (formData.target_value < 0) {
+      setAlertMessage('Value Cannot Be Less Than 0')
+      setShowAlert(true)
       return
     }
     try {
       const body = {
         name: formData.name,
         target_value: formData.target_value,
-        image_source: formData.image_source || null,
         status: false,
       }
       const response = await Goal_UltimateFinder.post(`/`, body)
@@ -228,8 +223,9 @@ const Goal: React.FC = () => {
 
   const handleSubmitGoalOther = async (e) => {
     e.preventDefault()
-    if (!goalOther.trim()) {
-      setNameError('Goal description is required')
+    if (!formData.name) {
+      setAlertMessage('Name Cannot Be Empty')
+      setShowAlert(true)
       return
     }
 
@@ -316,484 +312,416 @@ const Goal: React.FC = () => {
 
   return (
     <>
-      <div className='min-h-[650px]'>
-        {/* Tabs */}
-        <div className='flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit'>
+      {showAlert && (
+        <CustomAlert
+          message={alertMessage}
+          onClose={() => setShowAlert(false)}
+        />
+      )}
+      {/* <div className="bg-[url('./src/assets/Cloud.jpeg')] m-auto grid place-items-center"> */}
+      {/* <div className="bg-[url('bg.jpg')] m-auto grid place-items-center min-h-screen"> */}
+      <div className='tab-section bg-gray-100 p-4 rounded-lg backdrop-filter backdrop-blur-lg bg-opacity-40 min-h-[650px] border-2 border-indigo-200'>
+        <div className='flex flex-wrap gap-2 mb-4'>
           <button
-            className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === '#tab1'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+            className={`p-4 rounded-lg text-gray-700 font-bold hover:bg-gray-300 hover:bg-opacity-40 flex-grow ${
+              activeTab === '#tab1' ? 'bg-indigo-200' : ''
             }`}
             data-tab-target='#tab1'
             onClick={() => setActiveTab('#tab1')}>
-            Ultimate Goals
+            Ultimate
           </button>
           <button
-            className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === '#tab2'
-                ? 'bg-white text-gray-900 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
+            className={`p-4 rounded-lg text-gray-700 font-bold hover:bg-gray-300 hover:bg-opacity-40 flex-grow ${
+              activeTab === '#tab2' ? 'bg-indigo-200' : ''
             }`}
             data-tab-target='#tab2'
             onClick={() => setActiveTab('#tab2')}>
-            Other Goals
+            Other
           </button>
         </div>
 
-        {/* Tab 1: Ultimate Goals */}
-        <div
-          id='tab1'
-          className={`tab-content ${activeTab === '#tab1' ? '' : 'hidden'}`}>
-          <div className='grid grid-cols-1 xl:grid-cols-2 gap-5'>
-            {goalUltimateDatas &&
-              goalUltimateDatas.map((data) => {
-                const linkedNetworth = networthDatas.filter(
-                  (nw) => nw.goal_ultimate_id === data.id
-                )
-                const currentValue = linkedNetworth.reduce(
-                  (sum, nw) => sum + nw.value,
-                  0
-                )
-                const pct =
-                  data.target_value > 0
-                    ? (currentValue / data.target_value) * 100
-                    : 0
-                const progressWidth = Math.min(pct, 100)
-                const remaining = Math.max(data.target_value - currentValue, 0)
-
-                return (
+        <div className='mt-4'>
+          <div
+            id='tab1'
+            className={`tab-content text-gray-700 ${
+              activeTab === '#tab1' ? '' : 'hidden'
+            }`}>
+            <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 py-4'>
+              {goalUltimateDatas &&
+                goalUltimateDatas.map((data) => (
                   <div
                     key={data.id}
-                    className='bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow'>
-                    {/* Image Banner */}
-                    <div className='relative h-44 overflow-hidden'>
-                      <img
-                        src={data.image_source || CloudImage}
-                        alt={data.name}
-                        className='object-cover w-full h-full'
-                      />
-                      <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent' />
-                      <div className='absolute bottom-3 left-4 right-4 flex items-end justify-between'>
-                        <h2 className='text-lg font-bold text-white drop-shadow-md'>
-                          {data.name}
-                        </h2>
-                        <span
-                          className={`text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-sm ${
-                            pct >= 100
-                              ? 'bg-emerald-500/90 text-white'
-                              : 'bg-black/40 text-white border border-white/20'
-                          }`}>
-                          {pct >= 100 ? 'Achieved' : `${pct.toFixed(1)}%`}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className='px-5 pt-4 pb-2'>
-                      <div className='w-full h-2.5 bg-gray-100 rounded-full overflow-hidden'>
-                        <div
-                          className={`h-full rounded-full transition-all ${
-                            pct >= 100 ? 'bg-emerald-500' : 'bg-indigo-500'
-                          }`}
-                          style={{ width: `${Math.max(progressWidth, 1.5)}%` }}
+                    className='w-full bg-gray-300 rounded-xl shadow-md'>
+                    <div className='bg-white rounded-lg overflow-hidden shadow-md flex'>
+                      {/* Image Section */}
+                      <div className='w-1/2 p-2'>
+                        <img
+                          src={data.image_source || './src/assets/Cloud.jpeg'}
+                          alt={data.name}
+                          className='object-cover h-full w-full'
                         />
                       </div>
-                    </div>
 
-                    {/* Values */}
-                    <div className='px-5 pb-3 grid grid-cols-3 gap-3'>
-                      <div>
-                        <p className='text-[10px] text-gray-500 uppercase tracking-wider font-medium'>Target</p>
-                        <p className='text-sm font-bold text-gray-900'>
-                          RM {Number(data.target_value).toLocaleString('en-MY', { minimumFractionDigits: 2 })}
-                        </p>
-                      </div>
-                      <div>
-                        <p className='text-[10px] text-gray-500 uppercase tracking-wider font-medium'>Current</p>
-                        <p className='text-sm font-bold text-indigo-600'>
-                          RM {Number(currentValue).toLocaleString('en-MY', { minimumFractionDigits: 2 })}
-                        </p>
-                      </div>
-                      <div>
-                        <p className='text-[10px] text-gray-500 uppercase tracking-wider font-medium'>Remaining</p>
-                        <p className='text-sm font-bold text-gray-500'>
-                          RM {Number(remaining).toLocaleString('en-MY', { minimumFractionDigits: 2 })}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Linked Assets */}
-                    <div className='px-5 pb-3 border-t border-gray-50 pt-2.5'>
-                      <p className='text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-1.5'>Linked Assets</p>
-                      <div className='flex flex-wrap gap-1.5'>
-                        {linkedNetworth.length > 0 ? (
-                          linkedNetworth.map((nw) => (
-                            <span
-                              key={nw.id}
-                              className='text-xs bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md border border-indigo-100 font-medium'>
-                              {nw.name}
-                            </span>
-                          ))
-                        ) : (
-                          <span className='text-xs text-gray-300 italic'>No linked assets</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className='border-t border-gray-100 flex'>
-                      <button
-                        className='flex-1 text-sm font-medium text-indigo-600 hover:bg-indigo-50 py-2.5 transition-colors flex items-center justify-center gap-1.5'
-                        onClick={() =>
-                          openUpdateModal(
-                            data.id,
-                            data.name,
-                            data.target_value,
-                            data.current_value,
-                            data.image_source,
-                            data.status
-                          )
-                        }>
-                        <svg xmlns='http://www.w3.org/2000/svg' className='h-3.5 w-3.5' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
-                          <path strokeLinecap='round' strokeLinejoin='round' d='m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125' />
-                        </svg>
-                        Edit
-                      </button>
-                      <div className='w-px bg-gray-100' />
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
+                      {/* Content Section */}
+                      <div className='p-4 flex flex-col justify-between w-1/2'>
+                        <div>
+                          <h2 className='text-2xl font-extrabold mb-2'>
+                            {data.name}
+                          </h2>
+                          <h3 className='text-md font-semibold mb-1'>Target</h3>
+                          <p className='text-gray-700 mb-2'>
+                            {data.target_value}
+                          </p>
+                          <h3 className='text-md font-semibold mb-1'>
+                            Current
+                          </h3>
+                          <p className='text-gray-700 mb-2'>
+                            <CurrentValueCalculation id={data.id} />
+                          </p>
+                          {/* <h3 className='text-md font-semibold mb-1'>To Go</h3>
+                          <p className='text-gray-700 mb-2'>
+                            {data.target_value} -{' '}
+                            <CurrentValueCalculation id={data.id} />
+                          </p> */}
+                        </div>
+                        <div className='mt-4 flex justify-between'>
                           <button
-                            className='flex-1 text-sm font-medium text-red-500 hover:bg-red-50 py-2.5 transition-colors'
-                            onClick={() => setDeleteId(data.id)}>
-                            Delete
+                            className='bg-green-500 text-white px-4 py-1 rounded-lg hover:bg-green-600'
+                            onClick={() =>
+                              openUpdateModal(
+                                data.id,
+                                data.name,
+                                data.target_value,
+                                data.current_value,
+                                data.image_source,
+                                data.status
+                              )
+                            }>
+                            Update
                           </button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className='sm:rounded-2xl p-0 gap-0 max-w-sm border-0 shadow-2xl'>
-                          <div className='flex flex-col items-center text-center px-6 pt-8 pb-4'>
-                            <div className='w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mb-4'>
-                              <svg xmlns='http://www.w3.org/2000/svg' className='h-7 w-7 text-red-500' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={1.5}>
-                                <path strokeLinecap='round' strokeLinejoin='round' d='m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0' />
-                              </svg>
-                            </div>
-                            <AlertDialogHeader className='space-y-1.5'>
-                              <AlertDialogTitle className='text-lg font-bold text-gray-900'>
-                                Delete "{data.name}"?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription className='text-sm text-gray-500 leading-relaxed'>
-                                This goal and all its linked data will be permanently removed. This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                          </div>
-                          <div className='border-t border-gray-100 px-6 py-4 flex gap-3'>
-                            <AlertDialogAction
-                              onClick={() =>
-                                handleDeleteGoalUltimate(data.id)
-                              }
-                              className='flex-1 rounded-xl bg-red-500 hover:bg-red-600 text-white font-medium shadow-sm border-0'>
-                              Delete
-                            </AlertDialogAction>
-                            <AlertDialogCancel
-                              onClick={() => setDeleteId(null)}
-                              className='flex-1 rounded-xl border-gray-200 hover:bg-gray-50 font-medium'>
-                              Cancel
-                            </AlertDialogCancel>
-                          </div>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button
+                                className='bg-red-500 text-white px-4 py-1 rounded-lg hover:bg-red-600'
+                                onClick={() => setDeleteId(data.id)}>
+                                Delete
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you sure you want to delete?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will
+                                  permanently delete the item.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel
+                                  onClick={() => setDeleteId(null)}>
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleDeleteGoalUltimate(data.id)
+                                  }>
+                                  Continue
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )
-              })}
-
-            {/* Add Card */}
-            <div
-              className='bg-white shadow-sm rounded-xl p-6 flex flex-col border border-dashed border-gray-300 items-center justify-center min-h-[12rem] cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-colors'
-              onClick={openUltimateModal}>
-              <PlusCircleIcon className='h-8 w-8 text-gray-400' />
-              <span className='text-sm text-gray-400 mt-2'>Add Ultimate Goal</span>
+                ))}
+              <div
+                className='w-full h-60 border-4 border-gray-200 rounded-xl flex items-center justify-center cursor-pointer'
+                onClick={openUltimateModal}>
+                <span className='text-gray-500'>Add New Goal</span>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Tab 2: Other Goals */}
-        <div
-          id='tab2'
-          className={`tab-content ${activeTab === '#tab2' ? '' : 'hidden'}`}>
-          <div className='space-y-2'>
-            {goalOtherDatas &&
-              goalOtherDatas.map((data, index) => (
-                <div
-                  key={data.id}
-                  className='flex items-center gap-3 bg-white rounded-xl px-4 py-3.5 border border-gray-100 shadow-sm hover:shadow-md transition-all group'>
-                  <span className='w-6 h-6 rounded-md bg-indigo-50 text-indigo-500 text-xs font-bold flex items-center justify-center flex-shrink-0'>
-                    {index + 1}
-                  </span>
-                  <span className='flex-1 text-sm font-medium text-gray-800 leading-snug'>
-                    {data.name}
-                  </span>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button
-                        className='w-7 h-7 rounded-full flex items-center justify-center text-emerald-500 hover:bg-emerald-50 transition-colors opacity-0 group-hover:opacity-100'
-                        title='Mark as done'>
-                        <svg
-                          xmlns='http://www.w3.org/2000/svg'
-                          className='h-4.5 w-4.5'
-                          fill='none'
-                          viewBox='0 0 24 24'
-                          stroke='currentColor'
-                          strokeWidth={2.5}>
-                          <path
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            d='M5 13l4 4L19 7'
-                          />
-                        </svg>
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className='sm:rounded-2xl p-0 gap-0 max-w-sm border-0 shadow-2xl'>
-                      <div className='flex flex-col items-center text-center px-6 pt-8 pb-4'>
-                        <div className='w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4'>
-                          <svg xmlns='http://www.w3.org/2000/svg' className='h-7 w-7 text-emerald-500' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={1.5}>
-                            <path strokeLinecap='round' strokeLinejoin='round' d='M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' />
-                          </svg>
-                        </div>
-                        <AlertDialogHeader className='space-y-1.5'>
-                          <AlertDialogTitle className='text-lg font-bold text-gray-900'>
-                            Complete this goal?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription className='text-sm text-gray-500 leading-relaxed'>
-                            "{data.name}" will be marked as done and removed from your list.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                      </div>
-                      <div className='border-t border-gray-100 px-6 py-4 flex gap-3'>
-                        <AlertDialogAction
-                          onClick={() => handleDeleteGoalOther(data.id)}
-                          className='flex-1 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-medium shadow-sm border-0'>
-                          Yes, complete
-                        </AlertDialogAction>
-                        <AlertDialogCancel className='flex-1 rounded-xl border-gray-200 hover:bg-gray-50 font-medium'>
-                          Cancel
-                        </AlertDialogCancel>
-                      </div>
-                    </AlertDialogContent>
-                  </AlertDialog>
+          <div
+            id='tab2'
+            className={`tab-content text-gray-700 ${
+              activeTab === '#tab2' ? '' : 'hidden'
+            }`}>
+            <div className='grid grid-cols-1 gap-4 py-3'>
+              {goalOtherDatas &&
+                goalOtherDatas.map((data) => (
+                  <div
+                    key={data.id}
+                    className='flex items-center justify-between space-x-4 w-full bg-gray-300 rounded-xl p-4'>
+                    <span className='text-gray-800'>{data.name}</span>
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      className='h-6 w-6 text-gray-600 cursor-pointer'
+                      fill='none'
+                      viewBox='0 0 24 24'
+                      stroke='currentColor'
+                      onClick={() => handleDeleteGoalOther(data.id)}>
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M5 13l4 4L19 7'
+                      />
+                    </svg>
+                  </div>
+                ))}
+              <div className='flex items-center justify-between w-full bg-indigo-100 rounded-xl p-4'>
+                <div className='flex-1 text-center'>
+                  <h2 className='text-2xl font-extrabold mb-2'>
+                    You can do it!
+                  </h2>
                 </div>
-              ))}
-
-            {/* Add Other Goal */}
-            <button
-              className='w-full flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 border-2 border-dashed border-gray-300 cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-colors'
-              onClick={openModal}>
-              <PlusCircleIcon className='h-5 w-5 text-indigo-400' />
-              <span className='text-sm font-medium text-indigo-400'>Add a new goal</span>
-            </button>
+                <button
+                  className='flex items-center justify-center w-10 h-10 bg-blue-500 text-white rounded-full shadow-md hover:bg-blue-600 focus:outline-none'
+                  onClick={openModal}>
+                  <PlusCircleIcon className='w-6 h-6' />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Modal for update goal_ultimate*/}
       {isUpdateOpen && (
-        <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4'>
-          <div className='bg-white rounded-2xl shadow-2xl w-full max-w-md'>
-            <div className='flex items-center justify-between px-6 pt-6 pb-2'>
-              <h2 className='text-lg font-bold text-gray-900'>Update Goal</h2>
-              <button
-                onClick={closeUpdateModal}
-                className='w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors'>
-                <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
-                  <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
-                </svg>
-              </button>
-            </div>
+        <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+          <div className='bg-white p-6 rounded-lg shadow-xl'>
+            {/* Close Button */}
+            <button
+              // onClick={closeModal}
+              className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+              <svg
+                className='h-6 w-6'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M6 18L18 6M6 6l12 12'
+                />
+              </svg>
+            </button>
 
-            <form onSubmit={handleUpdate} className='px-6 pb-6'>
-              <div className='space-y-4 mb-6'>
-                <div>
-                  <label htmlFor='name' className='block text-sm font-medium text-gray-600 mb-1.5'>Goal Name</label>
+            {/* Form Content */}
+            <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+              <div className='bg-white p-6 rounded-lg shadow-xl w-96'>
+                <button
+                  // onClick={onClose}
+                  className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+                  <svg
+                    className='h-6 w-6'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'>
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M6 18L18 6M6 6l12 12'
+                    />
+                  </svg>
+                </button>
+
+                <form onSubmit={handleUpdate}>
+                  <label htmlFor='name'>Name:</label>
                   <input
                     type='text'
                     id='name'
                     name='name'
                     value={formData.name}
                     onChange={handleChange}
-                    className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors ${
-                      nameError ? 'border-red-400 focus:ring-red-500/20 focus:border-red-400' : 'border-gray-200 focus:ring-indigo-500/20 focus:border-indigo-400'
-                    }`}
-                    placeholder='e.g. House, Car'
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-                  {nameError && (
-                    <p className='text-xs text-red-500 mt-1'>{nameError}</p>
-                  )}
-                </div>
-                <div>
-                  <label htmlFor='target_value' className='block text-sm font-medium text-gray-600 mb-1.5'>Target Value (RM)</label>
+
+                  <label htmlFor='target_value'>Target value:</label>
                   <input
                     type='number'
                     id='target_value'
                     name='target_value'
                     value={formData.target_value}
                     onChange={handleChange}
-                    className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'
-                    placeholder='0.00'
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-                </div>
-                <ImageCropper
-                  currentImage={formData.image_source}
-                  onImageCropped={(base64) =>
-                    setFormData((prev) => ({ ...prev, image_source: base64 }))
-                  }
-                  onImageRemoved={() =>
-                    setFormData((prev) => ({ ...prev, image_source: '' }))
-                  }
-                />
-              </div>
 
-              <div className='flex gap-3'>
-                <button
-                  type='submit'
-                  className='flex-1 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-sm'>
-                  Save
-                </button>
-                <button
-                  type='button'
-                  onClick={closeUpdateModal}
-                  className='flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors'>
-                  Cancel
-                </button>
+                  <div className='flex justify-between'>
+                    <button
+                      type='submit'
+                      className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded'>
+                      Submit
+                    </button>
+                    <button
+                      type='button'
+                      onClick={closeUpdateModal}
+                      className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded'>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Modal for add goal ultimate*/}
       {isUltiOpen && (
-        <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4'>
-          <div className='bg-white rounded-2xl shadow-2xl w-full max-w-md'>
-            <div className='flex items-center justify-between px-6 pt-6 pb-2'>
-              <h2 className='text-lg font-bold text-gray-900'>Add Ultimate Goal</h2>
-              <button
-                onClick={closeUltimateModal}
-                className='w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors'>
-                <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
-                  <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
-                </svg>
-              </button>
-            </div>
+        <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+          <div className='bg-white p-6 rounded-lg shadow-xl'>
+            {/* Close Button */}
+            <button
+              onClick={closeUltimateModal}
+              className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+              <svg
+                className='h-6 w-6'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M6 18L18 6M6 6l12 12'
+                />
+              </svg>
+            </button>
 
-            <form onSubmit={handleSubmitGoalUltimate} className='px-6 pb-6'>
-              <div className='space-y-4 mb-6'>
-                <div>
-                  <label htmlFor='name' className='block text-sm font-medium text-gray-600 mb-1.5'>Goal Name</label>
+            {/* Form Content */}
+            <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+              <div className='bg-white p-6 rounded-lg shadow-xl w-96'>
+                <button
+                  // onClick={onClose}
+                  className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+                  <svg
+                    className='h-6 w-6'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'>
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M6 18L18 6M6 6l12 12'
+                    />
+                  </svg>
+                </button>
+
+                <form onSubmit={handleSubmitGoalUltimate}>
+                  <label htmlFor='name'>Goal :</label>
                   <input
                     type='text'
                     id='name'
                     name='name'
                     value={formData.name}
                     onChange={handleChange}
-                    className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors ${
-                      nameError ? 'border-red-400 focus:ring-red-500/20 focus:border-red-400' : 'border-gray-200 focus:ring-indigo-500/20 focus:border-indigo-400'
-                    }`}
-                    placeholder='e.g. House, Car'
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-                  {nameError && (
-                    <p className='text-xs text-red-500 mt-1'>{nameError}</p>
-                  )}
-                </div>
-                <div>
-                  <label htmlFor='target_value' className='block text-sm font-medium text-gray-600 mb-1.5'>Target Value (RM)</label>
+
+                  <label htmlFor='target_value'>Target :</label>
                   <input
                     type='number'
                     id='target_value'
                     name='target_value'
                     value={formData.target_value}
                     onChange={handleChange}
-                    className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'
-                    placeholder='0.00'
+                    className='border border-gray-300 rounded-md p-2 mb-4 w-full'
                   />
-                </div>
-                <ImageCropper
-                  currentImage={formData.image_source}
-                  onImageCropped={(base64) =>
-                    setFormData((prev) => ({ ...prev, image_source: base64 }))
-                  }
-                  onImageRemoved={() =>
-                    setFormData((prev) => ({ ...prev, image_source: '' }))
-                  }
-                />
-              </div>
 
-              <div className='flex gap-3'>
-                <button
-                  type='submit'
-                  className='flex-1 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-sm'>
-                  Save
-                </button>
-                <button
-                  type='button'
-                  onClick={closeUltimateModal}
-                  className='flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors'>
-                  Cancel
-                </button>
+                  <div className='flex justify-between'>
+                    <button
+                      type='submit'
+                      className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded'>
+                      Submit
+                    </button>
+                    <button
+                      type='button'
+                      onClick={closeUltimateModal}
+                      className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded'>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Modal for add goal_other*/}
       {isOpen && (
-        <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 p-4'>
-          <div className='bg-white rounded-2xl shadow-2xl w-full max-w-md'>
-            <div className='flex items-center justify-between px-6 pt-6 pb-2'>
-              <h2 className='text-lg font-bold text-gray-900'>Add Goal</h2>
-              <button
-                onClick={closeOtherModal}
-                className='w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors'>
-                <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
-                  <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
-                </svg>
-              </button>
-            </div>
+        <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+          <div className='bg-white p-6 rounded-lg shadow-xl'>
+            {/* Close Button */}
+            <button
+              onClick={closeOtherModal}
+              className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+              <svg
+                className='h-6 w-6'
+                fill='none'
+                viewBox='0 0 24 24'
+                stroke='currentColor'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth={2}
+                  d='M6 18L18 6M6 6l12 12'
+                />
+              </svg>
+            </button>
+            {/* Form Content */}
+            <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center'>
+              <div className='bg-white p-6 rounded-lg shadow-xl w-96'>
+                <button
+                  // onClick={onClose}
+                  className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+                  <svg
+                    className='h-6 w-6'
+                    fill='none'
+                    viewBox='0 0 24 24'
+                    stroke='currentColor'>
+                    <path
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      strokeWidth={2}
+                      d='M6 18L18 6M6 6l12 12'
+                    />
+                  </svg>
+                </button>
 
-            <form onSubmit={handleSubmitGoalOther} className='px-6 pb-6'>
-              <div className='space-y-4 mb-6'>
-                <div>
-                  <label htmlFor='name' className='block text-sm font-medium text-gray-600 mb-1.5'>What do you want to achieve?</label>
+                <form onSubmit={handleSubmitGoalOther}>
+                  <label htmlFor='name'>Goal :</label>
                   <textarea
-                    placeholder='Describe your goal...'
+                    placeholder='Enter your text here'
                     id='name'
                     name='name'
                     value={goalOther}
                     onChange={handleChangeGoalOther}
                     rows={3}
-                    className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors resize-none ${
-                      nameError ? 'border-red-400 focus:ring-red-500/20 focus:border-red-400' : 'border-gray-200 focus:ring-indigo-500/20 focus:border-indigo-400'
-                    }`}
+                    className='border border-gray-300 rounded-md p-2 mb-2 w-full'
                   />
-                  {nameError && (
-                    <p className='text-xs text-red-500 mt-1'>{nameError}</p>
-                  )}
-                </div>
+                  <div className='flex justify-between'>
+                    <button
+                      type='submit'
+                      className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded'>
+                      Submit
+                    </button>
+                    <button
+                      type='button'
+                      onClick={closeOtherModal}
+                      className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded'>
+                      Cancel
+                    </button>
+                  </div>
+                </form>
               </div>
-
-              <div className='flex gap-3'>
-                <button
-                  type='submit'
-                  className='flex-1 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-sm'>
-                  Save
-                </button>
-                <button
-                  type='button'
-                  onClick={closeOtherModal}
-                  className='flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors'>
-                  Cancel
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       )}

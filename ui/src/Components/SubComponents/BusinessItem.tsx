@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import BusinessFinder from '../../Apis/BusinessFinder'
-import { PlusIcon, BuildingStorefrontIcon, TrashIcon, PencilSquareIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { PlusIcon } from '@heroicons/react/24/solid'
 import ModalPortal from './ModalPortal'
 
 interface FormData {
@@ -18,7 +18,6 @@ interface ModalProps {
   formData: FormData
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
   title: string
-  error: string
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -28,98 +27,86 @@ const Modal: React.FC<ModalProps> = ({
   formData,
   onChange,
   title,
-  error,
 }) => {
   if (!isOpen) return null
 
   return (
     <ModalPortal>
-      <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[9999] p-4'>
-        <div className='bg-white rounded-2xl shadow-2xl w-full max-w-md relative animate-in fade-in zoom-in-95'>
-          {/* Header */}
-          <div className='flex items-center justify-between px-6 pt-6 pb-2'>
-            <h2 className='text-lg font-bold text-gray-900'>{title}</h2>
-            <button
-              onClick={onClose}
-              className='w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors'>
-              <svg className='h-5 w-5' fill='none' viewBox='0 0 24 24' stroke='currentColor' strokeWidth={2}>
-                <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
-              </svg>
-            </button>
-          </div>
+      <div className='fixed top-0 left-0 w-full h-full bg-gray-900 bg-opacity-50 flex justify-center items-center z-[9999]'>
+        <div className='bg-white p-6 rounded-lg shadow-xl w-96 relative'>
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            className='absolute top-0 right-0 m-2 text-gray-700 hover:text-gray-900'>
+            <svg
+              className='h-6 w-6'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='currentColor'>
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M6 18L18 6M6 6l12 12'
+              />
+            </svg>
+          </button>
 
-          <form onSubmit={onSubmit} className='px-6 pb-6'>
-            <div className='space-y-4 mb-6'>
-              <div>
-                <label htmlFor='name' className='block text-sm font-medium text-gray-600 mb-1.5'>Name</label>
-                <input
-                  type='text'
-                  id='name'
-                  name='name'
-                  value={formData.name}
-                  onChange={onChange}
-                  className={`w-full px-3.5 py-2.5 bg-gray-50 border rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors ${
-                    error ? 'border-red-400 focus:ring-red-500/20 focus:border-red-400' : 'border-gray-200 focus:ring-indigo-500/20 focus:border-indigo-400'
-                  }`}
-                  placeholder='Business name'
-                />
-                {error && (
-                  <p className='text-xs text-red-500 mt-1'>{error}</p>
-                )}
-              </div>
+          <h2 className='text-lg font-bold mb-4'>{title}</h2>
 
-              <div className='grid grid-cols-2 gap-3'>
-                <div>
-                  <label htmlFor='revenue' className='block text-sm font-medium text-gray-600 mb-1.5'>Revenue (RM)</label>
-                  <input
-                    type='number'
-                    id='revenue'
-                    name='revenue'
-                    value={formData.revenue}
-                    onChange={onChange}
-                    className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'
-                    placeholder='0.00'
-                  />
-                </div>
-                <div>
-                  <label htmlFor='capital' className='block text-sm font-medium text-gray-600 mb-1.5'>Capital (RM)</label>
-                  <input
-                    type='number'
-                    id='capital'
-                    name='capital'
-                    value={formData.capital}
-                    onChange={onChange}
-                    className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'
-                    placeholder='0.00'
-                  />
-                </div>
-              </div>
+          <form onSubmit={onSubmit}>
+            <label htmlFor='name'>Name:</label>
+            <input
+              type='text'
+              id='name'
+              name='name'
+              value={formData.name}
+              onChange={onChange}
+              className='border border-gray-300 rounded-md p-2 mb-4 w-full'
+            />
 
-              <div>
-                <label htmlFor='status' className='block text-sm font-medium text-gray-600 mb-1.5'>Operating Status</label>
-                <select
-                  id='status'
-                  name='status'
-                  value={formData.status ? 'true' : 'false'}
-                  onChange={onChange}
-                  className='w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-colors'>
-                  <option value=''>Select status</option>
-                  <option value='true'>Active</option>
-                  <option value='false'>Inactive</option>
-                </select>
-              </div>
-            </div>
+            <label htmlFor='revenue'>Revenue:</label>
+            <input
+              type='number'
+              id='revenue'
+              name='revenue'
+              value={formData.revenue}
+              onChange={onChange}
+              className='border border-gray-300 rounded-md p-2 mb-4 w-full'
+            />
 
-            <div className='flex gap-3'>
+            <label htmlFor='capital'>Capital:</label>
+            <input
+              type='number'
+              id='capital'
+              name='capital'
+              value={formData.capital}
+              onChange={onChange}
+              className='border border-gray-300 rounded-md p-2 mb-4 w-full'
+            />
+
+            <label htmlFor='status'>Operate?</label>
+            <select
+              id='status'
+              name='status'
+              value={formData.status ? 'true' : 'false'}
+              onChange={onChange}
+              className='border border-gray-300 rounded-md p-2 mb-4 w-full'>
+              <option value=''>Select Type</option>
+              <option value='true'>Yes</option>
+              <option value='false'>No</option>
+            </select>
+
+            <div className='flex justify-between'>
               <button
                 type='submit'
-                className='flex-1 px-4 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-sm'>
-                Save
+                className='bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded'>
+                Submit
               </button>
               <button
                 type='button'
                 onClick={onClose}
-                className='flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors'>
+                className='bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded'>
                 Cancel
               </button>
             </div>
@@ -130,57 +117,10 @@ const Modal: React.FC<ModalProps> = ({
   )
 }
 
-interface DeleteConfirmModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onConfirm: () => void
-  businessName: string
-}
-
-const DeleteConfirmModal: React.FC<DeleteConfirmModalProps> = ({
-  isOpen,
-  onClose,
-  onConfirm,
-  businessName,
-}) => {
-  if (!isOpen) return null
-
-  return (
-    <ModalPortal>
-      <div className='fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-[9999] p-4'>
-        <div className='bg-white rounded-2xl shadow-2xl w-full max-w-sm relative animate-in fade-in zoom-in-95'>
-          <div className='p-6 text-center'>
-            <div className='w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4'>
-              <ExclamationTriangleIcon className='h-6 w-6 text-red-500' />
-            </div>
-            <h3 className='text-lg font-bold text-gray-900 mb-1'>Delete Business</h3>
-            <p className='text-sm text-gray-500'>
-              Are you sure you want to delete <span className='font-medium text-gray-700'>"{businessName}"</span>? This action cannot be undone.
-            </p>
-          </div>
-          <div className='flex gap-3 px-6 pb-6'>
-            <button
-              onClick={onConfirm}
-              className='flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors shadow-sm'>
-              Delete
-            </button>
-            <button
-              onClick={onClose}
-              className='flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors'>
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    </ModalPortal>
-  )
-}
-
-const BusinessItem: React.FC<{ onDataChange?: () => void }> = ({ onDataChange }) => {
+const BusinessItem: React.FC = () => {
   const [datas, setDatas] = useState<any[]>([])
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [isUpdateOpen, setIsUpdateOpen] = useState(false)
-  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null)
   const [formData, setFormData] = useState<FormData>({
     id: 0,
     name: '',
@@ -188,13 +128,11 @@ const BusinessItem: React.FC<{ onDataChange?: () => void }> = ({ onDataChange })
     capital: 0,
     status: false,
   })
-  const [nameError, setNameError] = useState('')
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target
-    if (name === 'name') setNameError('')
     setFormData((prev) => ({
       ...prev,
       [name]: name === 'status' ? value === 'true' : value,
@@ -212,10 +150,7 @@ const BusinessItem: React.FC<{ onDataChange?: () => void }> = ({ onDataChange })
     setIsAddOpen(true)
   }
 
-  const closeAddModal = () => {
-    setNameError('')
-    setIsAddOpen(false)
-  }
+  const closeAddModal = () => setIsAddOpen(false)
 
   const openUpdateModal = (
     id: number,
@@ -224,26 +159,18 @@ const BusinessItem: React.FC<{ onDataChange?: () => void }> = ({ onDataChange })
     capital: number,
     status: boolean
   ) => {
-    setFormData({ id, name, revenue, capital, status: String(status) === 'true' })
+    setFormData({ id, name, revenue, capital, status })
     setIsUpdateOpen(true)
   }
 
-  const closeUpdateModal = () => {
-    setNameError('')
-    setIsUpdateOpen(false)
-  }
+  const closeUpdateModal = () => setIsUpdateOpen(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name.trim()) {
-      setNameError('Business name is required')
-      return
-    }
     try {
       const { name, revenue, capital, status } = formData
       await BusinessFinder.post('/', { name, revenue, capital, status })
       fetchData()
-      onDataChange?.()
     } catch (error) {
       console.log(error)
     }
@@ -252,36 +179,22 @@ const BusinessItem: React.FC<{ onDataChange?: () => void }> = ({ onDataChange })
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.name.trim()) {
-      setNameError('Business name is required')
-      return
-    }
     try {
       await BusinessFinder.put(`/`, formData)
       fetchData()
-      onDataChange?.()
     } catch (error) {
       console.log(error)
     }
     closeUpdateModal()
   }
 
-  const openDeleteConfirm = (id: number, name: string) => {
-    setDeleteTarget({ id, name })
-  }
-
-  const closeDeleteConfirm = () => setDeleteTarget(null)
-
-  const handleDelete = async () => {
-    if (!deleteTarget) return
+  const handleDelete = async (id: number) => {
     try {
-      await BusinessFinder.delete(`/${deleteTarget.id}`)
-      setDatas((prev) => prev.filter((d) => d.id !== deleteTarget.id))
-      onDataChange?.()
+      await BusinessFinder.delete(`/${id}`)
+      setDatas((prev) => prev.filter((d) => d.id !== id))
     } catch (err) {
       console.log(err)
     }
-    setDeleteTarget(null)
   }
 
   const fetchData = async () => {
@@ -299,113 +212,47 @@ const BusinessItem: React.FC<{ onDataChange?: () => void }> = ({ onDataChange })
     fetchData()
   }, [])
 
-  const fmtRM = (v: number) =>
-    `RM ${Number(v).toLocaleString('en-MY', { minimumFractionDigits: 2 })}`
-
   return (
     <>
-      {datas.length === 0 ? (
-        <div className='flex-1 h-full flex flex-col items-center justify-center'>
-          <div className='w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4'>
-            <BuildingStorefrontIcon className='h-8 w-8 text-gray-300' />
-          </div>
-          <p className='text-gray-400 text-lg mb-1'>No business data yet</p>
-          <p className='text-gray-300 text-sm mb-6'>Add your first business to get started</p>
-          <button
-            onClick={openAddModal}
-            className='inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2.5 px-5 rounded-xl transition-colors shadow-sm'>
-            <PlusIcon className='h-4 w-4' />
-            Add Business
-          </button>
-        </div>
-      ) : (
-      <div className='overflow-auto flex flex-col flex-1'>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-          {datas.map((data) => {
-            const profit = data.revenue - data.capital
-            const isProfit = profit >= 0
-            return (
-              <div
-                key={data.id}
-                className='bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow'>
-                {/* Header */}
-                <div className='px-5 pt-5 pb-3 flex items-center justify-between'>
-                  <div className='flex items-center gap-3'>
-                    <div className='w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center'>
-                      <span className='text-indigo-600 font-bold text-sm'>
-                        {data.name?.charAt(0)?.toUpperCase()}
-                      </span>
-                    </div>
-                    <h2 className='text-base font-semibold text-gray-800'>{data.name}</h2>
-                  </div>
-                  <span
-                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-                      String(data.status) === 'true'
-                        ? 'bg-emerald-50 text-emerald-600'
-                        : 'bg-gray-100 text-gray-500'
-                    }`}>
-                    {String(data.status) === 'true' ? 'Active' : 'Inactive'}
-                  </span>
-                </div>
-
-                {/* Revenue & Capital */}
-                <div className='px-5 pb-2'>
-                  <p className='text-xs text-gray-400 uppercase tracking-wider mb-1'>Revenue</p>
-                  <p className='text-2xl font-bold text-gray-900'>{fmtRM(data.revenue)}</p>
-                </div>
-
-                <div className='px-5 pb-3 flex items-center gap-4'>
-                  <div className='flex-1'>
-                    <p className='text-xs text-gray-400'>Capital</p>
-                    <p className='text-sm font-medium text-gray-600'>{fmtRM(data.capital)}</p>
-                  </div>
-                  <div className='flex-1'>
-                    <p className='text-xs text-gray-400'>Profit / Loss</p>
-                    <p
-                      className={`text-sm font-semibold ${
-                        isProfit ? 'text-emerald-600' : 'text-red-500'
-                      }`}>
-                      {isProfit ? '+' : '-'} {fmtRM(Math.abs(profit))}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Divider + Actions */}
-                <div className='border-t border-gray-100 flex'>
-                  <button
-                    className='flex-1 inline-flex items-center justify-center gap-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 py-2.5 transition-colors'
-                    onClick={() =>
-                      openUpdateModal(
-                        data.id,
-                        data.name,
-                        data.revenue,
-                        data.capital,
-                        data.status
-                      )
-                    }>
-                    <PencilSquareIcon className='h-4 w-4' />
-                    Edit
-                  </button>
-                  <div className='w-px bg-gray-100' />
-                  <button
-                    className='flex-1 inline-flex items-center justify-center gap-1.5 text-sm font-medium text-red-500 hover:bg-red-50 py-2.5 transition-colors'
-                    onClick={() => openDeleteConfirm(data.id, data.name)}>
-                    <TrashIcon className='h-4 w-4' />
-                    Delete
-                  </button>
-                </div>
+      <div className='h-[35rem] overflow-auto bg-white rounded-sm flex flex-col flex-1'>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+          {datas.map((data) => (
+            <div
+              key={data.id}
+              className='bg-white rounded-lg overflow-hidden shadow-md border border-gray-200'>
+              <div className='p-6'>
+                <h2 className='text-lg font-semibold mb-4'>{data.name}</h2>
+                <p className='text-gray-700'>Revenue : RM{data.revenue}</p>
               </div>
-            )
-          })}
+              <div className='flex'>
+                <button
+                  className='flex-1 bg-white text-black px-4 py-2 border border-gray-200'
+                  onClick={() =>
+                    openUpdateModal(
+                      data.id,
+                      data.name,
+                      data.revenue,
+                      data.capital,
+                      data.status
+                    )
+                  }>
+                  Edit
+                </button>
+                <button
+                  className='flex-1 bg-red-500 text-white px-4 py-2 border border-gray-200'
+                  onClick={() => handleDelete(data.id)}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
           <div
-            className='rounded-xl p-6 flex flex-col border border-dashed border-gray-200 items-center justify-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50/30 transition-colors'
+            className='bg-white shadow-md rounded-lg p-6 flex flex-col border border-gray-200 items-center justify-center w-70 h-40 cursor-pointer'
             onClick={openAddModal}>
-            <PlusIcon className='h-8 w-8 text-gray-300' />
-            <span className='text-sm text-gray-400 mt-2'>Add Business</span>
+            <PlusIcon className='h-10 w-10 text-gray-500' />
           </div>
         </div>
       </div>
-      )}
 
       {/* Add Modal */}
       <Modal
@@ -415,7 +262,6 @@ const BusinessItem: React.FC<{ onDataChange?: () => void }> = ({ onDataChange })
         formData={formData}
         onChange={handleChange}
         title='Add Business'
-        error={nameError}
       />
 
       {/* Update Modal */}
@@ -426,15 +272,6 @@ const BusinessItem: React.FC<{ onDataChange?: () => void }> = ({ onDataChange })
         formData={formData}
         onChange={handleChange}
         title='Update Business'
-        error={nameError}
-      />
-
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmModal
-        isOpen={deleteTarget !== null}
-        onClose={closeDeleteConfirm}
-        onConfirm={handleDelete}
-        businessName={deleteTarget?.name ?? ''}
       />
     </>
   )
