@@ -1,13 +1,14 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 
 import Layout from './Components/Layout'
 import Dashboard from './Components/Dashboard'
 import Investment from './Components/Investment'
 import Networth from './Components/Networth'
-import Skill from './Components/Skill'
 import Goal from './Components/Goal'
 import Business from './Components/Business'
 import Trading from './Components/Trading'
+import Asset from './Components/Asset'
+import Settings from './Components/Settings'
 
 import './App.css'
 
@@ -22,8 +23,9 @@ function App() {
             <Route path='investment' element={<Investment />} />
             <Route path='trading' element={<Trading />} />
             <Route path='business' element={<Business />} />
+            <Route path='asset' element={<Asset />} />
             <Route path='goal' element={<Goal />} />
-            <Route path='skill' element={<Skill />} />
+            <Route path='settings' element={<Settings />} />
           </Route>
         </Routes>
       </Router>

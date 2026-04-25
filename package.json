@@ -1,19 +1,21 @@
 {
   "name": "nextlife",
-  "version": "1.0",
+  "version": "2.2.1",
   "description": "Aim for the future",
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js"
   },
   "keywords": [],
-  "author": "Are Lee",
+  "author": "Fortune04",
   "license": "ISC",
   "dependencies": {
+    "better-sqlite3": "^12.9.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.1",
-    "nodemon": "^3.1.0",
-    "pg": "^8.11.3"
+    "express": "^4.19.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
   }
 }
