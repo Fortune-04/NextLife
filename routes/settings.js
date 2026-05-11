@@ -15,6 +15,7 @@ router.delete("/reset", (req, res, next) => {
       "trading_time",
       "goal_ultimate",
       "goal_other",
+      "asset",
       "skill",
       "skill_type",
     ];
@@ -49,6 +50,7 @@ router.get("/backup", (req, res, next) => {
       "trading_time",
       "goal_ultimate",
       "goal_other",
+      "asset",
       "skill",
       "skill_type",
     ];
@@ -91,6 +93,7 @@ router.post("/restore", (req, res, next) => {
       "trading_time",
       "goal_ultimate",
       "goal_other",
+      "asset",
       "skill",
       "skill_type",
     ];

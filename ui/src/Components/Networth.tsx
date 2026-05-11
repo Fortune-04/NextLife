@@ -246,11 +246,12 @@ const Networth: React.FC = () => {
             const isGain = gain >= 0
             const pct = data.base_value > 0 ? ((data.value / data.base_value) * 100) : 0
             const progressWidth = Math.min(pct, 100)
-            const typeLabel: Record<string, string> = { saving: 'Saving', invest: 'Investment', trading: 'Trading' }
+            const typeLabel: Record<string, string> = { saving: 'Saving', invest: 'Investment', trading: 'Trading', reserve: 'Reserve' }
             const typeColor: Record<string, string> = {
               saving: 'bg-blue-50 text-blue-600',
               invest: 'bg-violet-50 text-violet-600',
               trading: 'bg-amber-50 text-amber-600',
+              reserve: 'bg-emerald-50 text-emerald-600',
             }
 
             return (
@@ -469,6 +470,7 @@ const Networth: React.FC = () => {
                       <option value='saving'>Saving</option>
                       <option value='invest'>Investment</option>
                       <option value='trading'>Trading</option>
+                      <option value='reserve'>Reserve</option>
                     </select>
                   </div>
                   <div>
@@ -584,6 +586,7 @@ const Networth: React.FC = () => {
                       <option value='saving'>Saving</option>
                       <option value='invest'>Investment</option>
                       <option value='trading'>Trading</option>
+                      <option value='reserve'>Reserve</option>
                     </select>
                   </div>
                   <div>

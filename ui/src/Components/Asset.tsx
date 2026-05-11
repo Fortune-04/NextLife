@@ -12,8 +12,8 @@ import { PlusIcon, CubeIcon, TrashIcon, PencilSquareIcon, ExclamationTriangleIco
 interface FormData {
   id: number
   name: string
-  value: number
-  base_value: number
+  value: string
+  base_value: string
   value_mode: string
   networth_id?: number | undefined
 }
@@ -46,8 +46,8 @@ const Asset: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     id: 0,
     name: '',
-    value: 0,
-    base_value: 0,
+    value: '',
+    base_value: '',
     value_mode: 'rm',
     networth_id: 0,
   })
@@ -61,10 +61,8 @@ const Asset: React.FC = () => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]:
-        name === 'networth_id' || name === 'value' || name === 'base_value'
-          ? value === ''
-            ? name === 'networth_id' ? undefined : 0
-            : Number(value)
+        name === 'networth_id'
+          ? value === '' ? undefined : Number(value)
           : value,
     }))
   }
@@ -79,8 +77,8 @@ const Asset: React.FC = () => {
       ...formData,
       id: 0,
       name: '',
-      value: 0,
-      base_value: 0,
+      value: '',
+      base_value: '',
       value_mode: 'rm',
       networth_id: 0,
     })
@@ -99,8 +97,8 @@ const Asset: React.FC = () => {
       ...formData,
       id: id,
       name: name,
-      value: value,
-      base_value: base_value,
+      value: String(value),
+      base_value: String(base_value),
       value_mode: value_mode || 'rm',
       networth_id: networth_id,
     })
@@ -113,8 +111,8 @@ const Asset: React.FC = () => {
       ...formData,
       id: 0,
       name: '',
-      value: 0,
-      base_value: 0,
+      value: '',
+      base_value: '',
       value_mode: 'rm',
       networth_id: 0,
     })
@@ -131,8 +129,8 @@ const Asset: React.FC = () => {
     try {
       const body = {
         name: formData.name,
-        value: formData.value,
-        base_value: formData.base_value,
+        value: Number(formData.value) || 0,
+        base_value: Number(formData.base_value) || 0,
         value_mode: formData.value_mode,
         networth_id: formData.networth_id || null,
       }
@@ -168,8 +166,8 @@ const Asset: React.FC = () => {
       const body = {
         id: formData.id,
         name: formData.name,
-        value: formData.value,
-        base_value: formData.base_value,
+        value: Number(formData.value) || 0,
+        base_value: Number(formData.base_value) || 0,
         value_mode: formData.value_mode,
         networth_id: formData.networth_id || null,
       }
@@ -273,11 +271,13 @@ const Asset: React.FC = () => {
       <div className='overflow-auto flex flex-col flex-1'>
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
           {datas.map((data) => {
+            const numValue = Number(data.value) || 0
+            const numBaseValue = Number(data.base_value) || 0
             const currentValue = data.networth_id
-              ? (networthValueMap[data.networth_id] ?? data.value)
-              : data.value
-            const remaining = data.base_value - currentValue
-            const pct = data.base_value > 0 ? ((currentValue / data.base_value) * 100) : 0
+              ? (networthValueMap[data.networth_id] ?? numValue)
+              : numValue
+            const remaining = numBaseValue - currentValue
+            const pct = numBaseValue > 0 ? ((currentValue / numBaseValue) * 100) : 0
             const progressWidth = Math.min(pct, 100)
 
             return (
@@ -307,7 +307,7 @@ const Asset: React.FC = () => {
                 {/* Target */}
                 <div className='px-5 pb-2'>
                   <p className='text-xs text-gray-400 uppercase tracking-wider mb-1'>Target</p>
-                  <p className='text-2xl font-bold text-gray-900'>{fmtValue(data.base_value, data.value_mode)}</p>
+                  <p className='text-2xl font-bold text-gray-900'>{fmtValue(numBaseValue, data.value_mode)}</p>
                 </div>
 
                 {/* Current & Remaining */}
@@ -351,8 +351,8 @@ const Asset: React.FC = () => {
                       openUpdateModal(
                         data.id,
                         data.name,
-                        data.value,
-                        data.base_value,
+                        numValue,
+                        numBaseValue,
                         data.value_mode,
                         data.networth_id
                       )

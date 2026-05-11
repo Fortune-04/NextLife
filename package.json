@@ -1,6 +1,6 @@
 {
   "name": "nextlife",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Aim for the future",
   "main": "server.js",
   "scripts": {
